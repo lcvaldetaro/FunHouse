@@ -50,8 +50,11 @@ These games have been migrated from C/Fortran to clean, coroutine-based Kotlin:
 ### 4. Interactive Chatbots & Arcades
 * **Eliza** (`:feature:eliza-kotlin`): The classic conversational therapist chatbot.
 * **Classic Arcades** (`:feature:classic-arcades`): Retro-inspired casual arcade modules.
+  - Padddle Ball
+  - Alien Invaders
+  - Pinball
+  - Retro Circuit
 * **Space Wars** (`:feature:space-wars-kotlin`): Realtime space combat and strategy.
-* **Tetric** (`:feature:tetric`): A "secret" fallback game unlocked through secrets in the Eliza chatbot interface.
 
 ---
 
