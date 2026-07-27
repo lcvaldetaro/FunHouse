@@ -27,7 +27,6 @@ The codebase is modularized using distinct feature modules located under `featur
   * *Wander Aldebaran*
   * *Wander Library*
   * *Wander Logic Ops*
-* **Wizards' Castle Engine** (`:feature:wizards-castle-kotlin`): Powers *Orb of Zot*.
 
 ### 2. Migrated Classic Text Adventures
 These games have been migrated from C/Fortran to clean, coroutine-based Kotlin:
@@ -38,6 +37,7 @@ These games have been migrated from C/Fortran to clean, coroutine-based Kotlin:
 * **Castle** (`:feature:castle-kotlin`)
 * **Chimaera** (`:feature:chimaera-kotlin`)
 * **Hangman** (`:feature:hangman-kotlin`)
+* **Orb Of Zot** (`:feature:wizards-castle-kotlin`)
 
 ### 3. Casino & Chance Games
 * **Blackjack** (`:feature:blackjack`)
@@ -50,7 +50,7 @@ These games have been migrated from C/Fortran to clean, coroutine-based Kotlin:
 ### 4. Interactive Chatbots & Arcades
 * **Eliza** (`:feature:eliza-kotlin`): The classic conversational therapist chatbot.
 * **Classic Arcades** (`:feature:classic-arcades`): Retro-inspired casual arcade modules.
-  - Padddle Ball
+  - Paddle Ball
   - Alien Invaders
   - Pinball
   - Retro Circuit
@@ -80,8 +80,11 @@ Use these scripts and Gradle commands to run or compile target versions:
   ./gradlew :composeApp:run
   ```
 * **Package Native Distributions**:
-  ```bash
-  ./gradlew :composeApp:packageDistributionForCurrentOS
+  ```bash (for MacOs)
+  ./globalsdwgradlew packageDmg
+  ```
+  ```windows
+  gradlew.bat packageMsi
   ```
 
 ### Android
@@ -94,7 +97,7 @@ Use these scripts and Gradle commands to run or compile target versions:
 
 ## 📐 Architecture & Libraries
 This repository uses the latest KMP ecosystem standards:
-* **UI Framework**: Compose Multiplatform with **Material 3 Adaptive Suite** & **Navigation 3**.
+* **UI Framework**: Compose Multiplatform with **Material 3 Adaptive Suite**.
 * **State Management**: **Circum (MVI)** for state flow where designated.
-* **Logging**: `club.gepetto.GcLog` (avoid standard println/Log).
-* **Localization**: Fully localized across German (`de`), Spanish (`es`), French (`fr`), Italian (`it`), Portuguese (`pt`), and English (`en`).
+* **Logging**: `club.gepetto.GcLog` (avoid standard println/Log/Timber).
+* **Localization**: Partially localized across German (`de`), Spanish (`es`), French (`fr`), Italian (`it`), Portuguese (`pt`), and English (`en`).
