@@ -1,0 +1,30 @@
+Number,Place,South,North,West,East,SW,SE,NW,NE,Up,Down,In,Out,Points,Status,Object Dependency,Message,Alternate Description,Description
+1,in a Large Clearing in a forest.,17,,2,,,,,,,18,19,,,,,,,"Here is a plane that landed because of mechanical problems, and you can see woods all around. There is a small path leading into the woods to the west and you can see a small sign by the path.  There is a dark pit leading down."
+2,in a Forest.,3,,,1,,,,,,,,,,,,,,You are lost in the woods. There are trees all around you.
+3,in a Forest.,4,2,,,,,,,,,,,,,,,,You are lost in the woods. There are trees all around you.
+4,in a Forest.,,3,5,,,,,,,,,,,,,,,You are lost in the woods. There are trees all around you.
+5,in a Sandy Shore.,6,7,,4,,,,,,,6,,,,,,,"There is a small boat in the sea to the south, and there is a pathway can be seen to the north, another to the east. You can hear sounds of sea splashing off the shore. You stand on a yellow and hot sand that burns on your feet. This reminded you on those Pirate Gold films you were watching at home. "
+6,In a boat.,,5,,,,,,,,,,5,,,,,,It is a small boat. You can see and hear a sea splashing off the shore.
+7,in a Forest path.,5,8,,,,,,,,,,,,,,,,"This is a small path in the wood that runs from north to south. To the south  sounds of sea can be heard, and you can see some buildings to the north. The wood is here less frequent."
+8,in a Forest path.,7,9,,,,,,,,,,,,,,,,"You are on a a small path in the wood that continues to the north and to the south. To the north you can see a small village, and to the south you can hear the sounds of sea."
+9,In a village.,8,11,15,-10,,,,20,,,-10,,,,,,,"This is a small village on the small clearing sorrounded by wood. Here, you can see some houses all made of bamboo wood, a large house with 2 floors to the northeast,  and an old house made of solid rock to the east. Yet, although village looks habitable, there is no body here. You can see a rocky ledge to the west, and a distant mountain to the north. There is a path running into the woods to the south. There is a fuel pump."
+10,In an old house.,,,9,,,,,,,,,9,50,dark,21,You cannot enter. The door is locked.,It is pitch dark,"From the ceiling, an oil lamp gives some light. The house contains only one room with no windows and one door to the west. The walls are old and rusty, and you can feel the moisture in the air."
+11,at a Mountain side.,9,12,,,,,,,,,,,,,,,,You are on a path that runs up in mountain to the north. You can see a village surrounded by woods to the south.
+12,at a Mountain side.,11,13,,,,,,,,,,,,,,,,You are on a path that runs up in mountain to the north. You can see a village surrounded by woods to the south.
+13,at a Cave mouth.,12,14,,,,,,,,,14,,,,,,,You are in front of an entrance to the cave to the north. There is a path going down to the south.
+14,In a cave.,13,,,,,,,,,,,13,,,,,,You are in a cave. It is a small cave. 
+15,in a Cliff path.,,,16,9,,,,,,29,,,,,,,,This is a small rocky pathway that leads to the ledge on the west. You can see a village to the east and an exit leading south. You can hear drops of water from somewhere.
+16,in a Rocky ledge.,,,,15,,,,,,,,,,,,,,"You are on top of the rocky ledge. Here you can see a grave that speaks : '....Here lies CyberDaemon....', followed by a message. Looking around you can see woods far below, and a small village to the east. To the north you can see a distant huge mountain. There is a chasm all around you except the small path to the east."
+17,in a Dead end.,,1,,,,,,,,,,,,,,,,This is just a dead end with nothing to it.
+18,in a Dark pit.,,,,,,,,,1,,,,-255,,,,,You fell on a dark pit to your death and died! Game over.
+19,in an airplane.,,,,,,,,,,,,1,,,,,,The airplane is a mess inside because of a rough landing with mechanical problems. Loose papers can be seen everywhere. This airplane has seen better days.
+20,In the lobby of a House.,,23,21,,9,,22,24,25,,,9,,,,,, The are some stairs here.
+21,In the Study room of a house.,,,,20,,,,,,,,,,,,,,In the Study room of a house.
+22,In the kitchen of a house.,,,,,,20,,,,,,,,,,,,In the kitchen of a house.
+23,In the living room of a house.,20,,,,,,,,,,,,,,,,,In the living room of a house.
+24,In the dining room of a house.,,,,,20,,,,,,,,,,,,,In the dining room of a house.
+25,in the Den of the second floor of a house.,,27,,26,,,28,,,20,,,,,,,,There are stairs here.
+26,in The master bedroom of a house.,,,25,,,,,,,,,,,,,,,in The master bedroom of a house.
+27,in the guest bedroom of a house.,25,,,,,,,,,,,,,,,,,in the guest bedroom of a house.
+28,int a small bedroom of a house.,,,,,,25,,,,,,,,,,,,int a small bedroom of a house.
+29,in the bottom of a rocky ledge,,,,,,,,,1,,,,-255,,,,,"You have obviously not read the sign, so you slip off the ledge and  fell to your death and died!  Game over."

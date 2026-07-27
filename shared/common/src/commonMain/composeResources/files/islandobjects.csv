@@ -1,0 +1,34 @@
+Number,Object Name,Nickname,Location,Weight,Points dropping,Place to drop/open,Points taking,Status,Verbs,Text,Dependency,Imcompatible,Description
+1,a heavy engine,engine,6,,,,,,start,,,,It is a MERCURY 720 engine.
+2,a golden key,key,2,,50,10,,,"get, open",,,,Look like your house key.
+3,an iron can,can,10,,400,12,,,get,,,,It is a medium size green army fuel can.
+4,some food,food,22,,,,50,,get,,,,It smells like a fried chicken.
+5,a shovel,shovel,16,,,,,,get,,,,It looks like a shovel that grave-diggers use.
+6,a plastic cup,cup,1,,,,,,get,,,,Just an ordinary cup.
+7,a wooden stick,stick,1,,,,,,get,,,,It has perhaps fallen from a tree.
+8,a small paper,paper,10,,,,,,"get, read",DEATHMATCH.,,,It is a computer paper. Something is written on it.
+9,a chest,chest,10,,200,17,20,,"get,open,unlock",,,,The chest is locked.
+10,a ball,ball,6,,,,1,,get,,,,it is a soccer ball
+11,an old house,house,9,,,,,,,,,,"The house is rusty and old. With no windows, only a door."
+12,a small boat in the sea,boat,5,,,,,,,,,,It is a military SCORPION speed boat.
+13,a yellow sand on the ground,sand,5,,,,,,get,,,,It looks just like the sand.
+14,some fuel,fuel,4,,400,12,50,,get,,3,21,"It smells like querosene, and it is blue."
+15,an iron door on the house,door,9,,,,,,,,,,Just a closed door.
+16,an airplane,Airplane,1,,,,,,start,,,,WOW! An YF-22 !! Too bad is has mechanical problems
+17,a sign,sign,1,,,,,,read, Tourists! Proceed with caution and Take some food before leaving island...',,,There is something written on it.
+18,an ancient grave,grave,16,,,,,,,,,,...Here lies CyberDaemon...
+19,a treasure chest,treasure,6,,300,17,30,,get,,,,Is there a treasure inside? Who knows....
+20,some Silver bars,silver,11,,100,17,10,,get,,,,Many bars of pure silver
+21,a lamp,lamp,7,,,,10,off,"get,turn",,,,"It is a gaz lamp, has a switch on the side that ignites it"
+22,a liquid Container,Container,10,,500,12,10,,get,,,,It is a 20 Gallon container
+23,Fuel,Fuel,9,,500,12,100,,get,,22,21,"Fuel - about 15 gallons, smells like querosene"
+24,a bucket,bucket,1,,,,5,,get,,,,Just a plain bucket
+25,a Knife,Knife,3,1,,,50,,get,,,,A 5-inch sharp knife
+26,a Revolver,Revolver,10,2,,,50,,get,,,,A 32 Caliber Smith & Wesson revolver with one bullet only.
+27,a Gun,Gun,6,5,,,50,,get,,,,"A Walter PPK, magazine loaded."
+28,a Toolbox,toolbox,26,,,,10,,get,,,,"A toolbox, full of tools."
+29,a large house with 2 floors,large house,9,,,,,,,,,,a large house with 2 floors
+30,a Barrel ,Barrel,14,,,,,,get,,,,"a Golden Barrel, full of diamonds"
+31,some water,water,19,,,,10,,get,,,,Large bottle of drinkable water
+32,a message,message,16,,,,,,read,Beware of falling over the ledge!,,,A message engraved on the grave
+33,an  ignition button,ignition,19,,,,,,start,,,,What do you want to know about a button?

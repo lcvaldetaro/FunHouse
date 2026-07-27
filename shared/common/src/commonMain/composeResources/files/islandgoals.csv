@@ -1,0 +1,4 @@
+Number,Obectivename,Finish Game,Points Awarded to owner,Ponts awared to non-owner,Verbs,Location,Object,text,Loc Dep,Obj Dependency,Obj Incompatible,Error text,Non owner text,Description,,
+1,Escape the island by plane.,y,400,70,start,19,,,,"22,23,28",,You are not ready,"OK, the airplane is started, but you don't know how to fly a plane. What now?","The airplane started, and you graciously took off from the clearing…. Congratulations!!!  You have finished the game, and you have proved yourself to be an andventurist. ",,
+2,Escape by boat.,y,150,40,start,6,,,,"4,14",,You don't have fuel for that,"OK""", the engine is started," but you don't know how navigate a boat in the sea. What now?""","The boat's engine started, and you quietly guided it to the sea…. Congratulations!!!  You have finished the game, and you have proved yourself to be an andventurist. "
+3,Take a pile of  Gold that is in the island somewhere.,y,100,30,Take,,19,,,,,,,You took the Gold!,,

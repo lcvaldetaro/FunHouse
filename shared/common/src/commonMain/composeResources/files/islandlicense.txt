@@ -1,0 +1,8 @@
+        This App is copyright(c) Valdetaro Consulting, LLC. DBA Gepetto Club.
+
+        The Game Engine used in the game "Lost Island" is
+        Copyright(c) 1992-2018 Luiz Claudio Valdetaro.
+        Copyright(c) 2018-2024 Valdetaro Consulting, LLC, DBA Gepetto Club.
+        All Rights Reserved.
+
+        The game "Lost Island" itself is in public domain.

@@ -1,0 +1,19 @@
+Number,Object Name,Nickname,Location,Weight,Points dropping,Place to drop/open,Points Taking,Status,Verbs,Text,,,Description
+1,a heavy engine,engine,6,,,,,10,get,,,,It is a MERCURY 720 engine.
+2,a golden key,key,2,,,8,,10,"get,open",,,,Look at your house key.
+3,an iron can,can,18,,,,,10,get,,,,It is a medium size green army fuel can.
+4,some food,food,10,,,,,10,get,,,,It smells like a fried chicken.
+5,a sign,sign,21,,,,,10,read,"The ticket booth is boarded up. Enter at your own risk! Find a ticket and open the door.",,,A sign on the wall.
+6,a lamp,lamp,1,,,,10,off,"get,turn",,,,It is an electric lamp.
+7,an iron door,door,5,,,,10,,,,,,Just a closed door.
+8,a ticket,ticket,21,,,1,,10,"get,open",,,,An old unused funhouse ticket.
+9,a mirror,mirror,12,,,,,10,,,,,,A giant mirror reflecting your face.
+10,a string,string,13,,,,,10,get,,,,A puppet string.
+11,a music box,box,13,,,,,locked,open,,,,A locked puppet music box.
+12,a teller,teller,17,,,,,10,start,,,,Zoltar the fortune teller.
+13,a copper coin,coin,17,,,,,10,get,,,,A shiny copper coin.
+14,a generator switch,switch,14,,,,,10,turn,,,,A heavy switchboard handle.
+15,a safe,safe,19,,,,,locked,open,,,,A locked circus ringmaster's safe.
+16,a ringmaster key,key,19,,,22,,10,"get,open",,,,A large silver key with the circus logo.
+17,a wooden horse,horse,16,,,,,10,,,,,,A carousel horse.
+18,an exit gate,gate,16,,,,,locked,,,,,,A locked iron gate leading to freedom.

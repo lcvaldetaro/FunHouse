@@ -1,0 +1,11 @@
+        This App is copyright(c) Valdetaro Consulting, LLC. DBA Gepetto Club.
+
+        The Game Engine used in the game "Fun House" is
+        Copyright(c) 1992-2018 Luiz Claudio Valdetaro.
+        Copyright(c) 2018-2024 Valdetaro Consulting, LLC, DBA Gepetto Club.
+        All Rights Reserved.
+
+        The game "Fun House" itself is
+        Copyright(c) 1992-2018 Luiz Claudio Valdetaro.
+        Copyright(c) 2018-2024 Valdetaro Consulting, LLC, DBA Gepetto Club.
+        All Rights Reserved.

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Gepetto Club Fun House</string>
+    <string name="copyright">Copyright© 2018–2026 Valdetaro Consulting, LLC dba Gepetto Club</string>
+    <string name="main_banner_content">A Gepetto le encantan los juegos. ¡En esta era moderna, también le gustan los juegos de ordenador! Como es un poco mayor, prefiere los juegos clásicos y los que requieren pensar.\n\nHa seleccionado un grupo de juegos clásicos, además de algunos más nuevos. Hay algunas categorías: Chatbots, Juegos de habilidad, Juegos de azar, Juegos de arcade, Juegos de aventura, además de juegos multijugador que se pueden jugar a través de wifi con otros. Puedes elegir la categoría a continuación.\n\nLos iconos de abajo seleccionan las categorías de juegos. ¡Disfruta!</string>
+    <string name="skill_banner_content">Hay algunos juegos de cartas, algunos juegos conocidos como \"El Ahorcado\" y el que todo estudiante de ingeniería jugó en la universidad (Space Wars).\n\nLos iconos de la parte superior izquierda inician los diferentes juegos. Como algunos de esos juegos se basan en texto, puedes activar su función de voz tocando el icono del altavoz.\n\n¡Disfruta!</string>
+    <string name="arcade_banner_content">Hay algunas reencarnaciones de antiguos juegos de arcade…\n\nLos iconos de la parte superior izquierda inician los diferentes juegos.\n\n¡Disfruta!</string>
+    <string name="adventure_banner_content">Gepetto seleccionó un grupo de juegos clásicos, además de algunos más nuevos. El juego de aventura de texto más famoso (Colossal Cave Adventure, también conocido como \"Adventure\") y many otros.\n\nLos iconos de la parte superior izquierda inician los diferentes juegos. Como estos juegos se basan en texto, puedes activar su función de voz tocando el icono del altavoz.\n\n¡Disfruta!</string>
+    <string name="luck_banner_content">Hay una máquina tragaperras y una ruleta (iconos en la parte superior izquierda).\n\n¡Buena suerte!</string>
+    <string name="other_banner_content">Está \"Eliza\", el primer chatbot de \"IA\". Y \"Logic\" es un bot que te enseñará lógica binaria.\n\nLos iconos de la parte superior izquierda aquí inician los diferentes juegos. Como se basan en texto, puedes activar su función de voz tocando el icono del altavoz.\n\n¡Disfruta!</string>
+    <string name="other_title">Chatbots</string>
+    <string name="luck_title">Juegos de azar</string>
+    <string name="skill_title">Juegos de habilidad</string>
+    <string name="arcade_title">Juegos de arcade</string>
+    <string name="adventure_title">Juegos de aventura</string>
+
+    <string name="about_game">Acerca de %s</string>
+    <string name="privacy_policy_title">Política de Privacidad</string>
+    <string name="version_text">%1$s\nversión %2$s</string>
+    <string name="cached">En caché</string>
+    <string name="profile">Perfil</string>
+    <string name="exit">Salir</string>
+    <string name="notes">Notas</string>
+    <string name="about">Acerca de</string>
+    <string name="voice">Voz</string>
+    <string name="help">Ayuda</string>
+    <string name="command_label">comando</string>
+    <string name="winnings_per_game">Ganancias por juego:\n</string>
+    <string name="network_failed">La llamada a la red falló</string>
+    <string name="retry">Reintentar</string>
+    <string name="back">atrás</string>
+    <string name="loading_games">Cargando juegos…</string>
+    <string name="game_version_template">\nVersión %1$s\n\n%2$s</string>
+    <string name="version_build_format">%1$s/bld %2$d</string>
+    <string name="nav_profile">Perfil</string>
+    <string name="nav_info">Info</string>
+    <string name="nav_chatbots">Chatbots</string>
+    <string name="nav_skills">Habilidad</string>
+    <string name="nav_arcade">Arcade</string>
+    <string name="nav_chance">Suerte</string>
+    <string name="nav_adventure">Aventura</string>
+    <string name="nav_advent">Avent.</string>
+    <string name="nav_multiplayer">Multij</string>
+    <string name="multiplayer_title">Juegos Multijugador</string>
+    <string name="multiplayer_banner_content">¡Juega a juegos con otros en la red! Debes estar en la misma red WI-FI.\n\nLos iconos de la esquina superior izquierda inician los diferentes juegos. Como estos juegos están basados en texto, puedes activar su función de voz tocando el icono del altavoz.\n\n¡Disfruta!</string>
+    <string name="adventure_game_welcome">Colossal cave adventure game!\n</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="greetings_text">By default I will not speak all the words for you. If you want to change it, tap on the speaker icon to toggle the sound.</string>
+    <string name="hello_player">\nHello %s. Let\'s play!\n</string>
+    <string name="echo_prefix">&gt;You: </string>
+    <string name="winnings_in_game">Winnings in this game: %s Liras.</string>
+    <string name="total_in_wallet">Total in wallet %s Liras.</string>
+    <string name="wallet_entry">%1$s : %2$s Liras\n</string>
+    <string name="game_only_in_english">This game only exists n English for now.\n</string>
+</resources>

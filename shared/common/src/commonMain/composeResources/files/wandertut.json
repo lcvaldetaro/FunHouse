@@ -1,0 +1,20 @@
+{
+  "gameName": "wandertut",
+  "nickName": "wandertut",
+  "library": "gepetto.wan",
+  "title": "Logical Bit Operations",
+  "menuTitle": "Logic",
+  "gameType": "OTHER",
+  "about": "Wander Logical Bit Operations\nWander Game Engine Version 1.6 2/23/85\nWANDER -- Non-deterministic fantasy story tool\nThis game engine has been used under permission from the copyright owner, Peter S. Langston.\nCopyright (c) 1978 by Peter S. Langston - New  York,  N.Y.",
+  "version": "2.0",
+  "greeting": "Welcome do the Wander Logical Bit Operations!",
+  "gameImage": {"fileName":  "wandertut.png"},
+  "helpFile": {"fileName": "wandertut.md"},
+  "licenseFile": {"fileName":  "gnulicense.txt"},
+  "wanderMiscFile": {"fileName":  "tut.misc"},
+  "wanderWrldFile": {"fileName":  "tut.wrld"},
+  "directionColumns": 6,
+  "directions": [
+    { "label": "About", "command": "about"}
+  ]
+}

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Gepetto Club Fun House</string>
+    <string name="copyright">Copyright© 2018–2026 Valdetaro Consulting, LLC dba Gepetto Club</string>
+    <string name="main_banner_content">Gepetto liebt Spiele. In der heutigen Zeit mag er auch Computerspiele! Da er schon etwas älter ist, bevorzugt er klassische Spiele und Spiele, bei denen man nachdenken muss.\n\nEr hat eine Reihe klassischer Spiele sowie einige neuere ausgewählt. Es gibt verschiedene Kategorien: Chatbots, Geschicklichkeitsspiele, Glücksspiele, Arcade-Spiele, Abenteuerspiele sowie Mehrspieler-Spiele, die über WLAN mit anderen gespielt werden können. Sie können die Kategorie unten auswählen.\n\nDie Symbole unten wählen die Spielkategorien aus. Viel Spaß!</string>
+    <string name="skill_banner_content">Es gibt einige Kartenspiele, bekannte Spiele wie \"Galgenmännchen\" und das Spiel, das jeder Ingenieurstudent im College gespielt hat (Space Wars).\n\nDie Symbole oben links starten die verschiedenen Spiele. Da einige dieser Spiele textbasiert sind, können Sie deren Sprachfunktion aktivieren, indem Sie auf das Lautsprechersymbol tippen.\n\nViel Spaß!</string>
+    <string name="arcade_banner_content">Es gibt einige Neuauflagen alter Arcade-Spiele…\n\nDie Symbole oben links starten die verschiedenen Spiele.\n\nViel Spaß!</string>
+    <string name="adventure_banner_content">Gepetto hat eine Reihe klassischer Spiele sowie einige neuere ausgewählt. Das berühmteste Text-Adventure-Spiel (Colossal Cave Adventure alias \"Adventure\") und viele andere.\n\nDie Symbole oben links starten die verschiedenen Spiele. Da diese Spiele textbasiert sind, können Sie deren Sprachfunktion aktivieren, indem Sie auf das Lautsprechersymbol tippen.\n\nViel Spaß!</string>
+    <string name="luck_banner_content">Es gibt einen Spielautomaten und ein Roulette (Symbole oben links).\n\nViel Glück!</string>
+    <string name="other_banner_content">Hier gibt es \"Eliza\", den ersten \"KI\"-Chatbot. Und \"Logic\" ist ein Bot, der Ihnen die binäre Logik beibringt.\n\nDie Symbole oben links starten die verschiedenen Spiele. Da sie textbasiert sind, können Sie deren Sprachfunktion aktivieren, indem Sie auf das Lautsprechersymbol tippen.\n\nViel Spaß!</string>
+    <string name="other_title">Chatbots</string>
+    <string name="luck_title">Glücksspiele</string>
+    <string name="skill_title">Geschicklichkeitsspiele</string>
+    <string name="arcade_title">Arcade-Spiele</string>
+    <string name="adventure_title">Abenteuerspiele</string>
+
+    <string name="about_game">Über %s</string>
+    <string name="privacy_policy_title">Datenschutzrichtlinie</string>
+    <string name="version_text">%1$s\nVersion %2$s</string>
+    <string name="cached">Im Cache</string>
+    <string name="profile">Profil</string>
+    <string name="exit">Beenden</string>
+    <string name="notes">Notizen</string>
+    <string name="about">Über</string>
+    <string name="voice">Stimme</string>
+    <string name="help">Hilfe</string>
+    <string name="command_label">Befehl</string>
+    <string name="winnings_per_game">Gewinne pro Spiel:\n</string>
+    <string name="network_failed">Netzwerkaufruf fehlgeschlagen</string>
+    <string name="retry">Wiederholen</string>
+    <string name="back">Zurück</string>
+    <string name="loading_games">Spiele werden geladen…</string>
+    <string name="game_version_template">\nVersion %1$s\n\n%2$s</string>
+    <string name="version_build_format">%1$s/bld %2$d</string>
+    <string name="nav_profile">Profil</string>
+    <string name="nav_info">Info</string>
+    <string name="nav_chatbots">Chatbots</string>
+    <string name="nav_skills">Geschick</string>
+    <string name="nav_arcade">Arcade</string>
+    <string name="nav_chance">Glück</string>
+    <string name="nav_adventure">Abenteuer</string>
+    <string name="nav_advent">Abent.</string>
+    <string name="nav_multiplayer">Mehrspieler</string>
+    <string name="multiplayer_title">Mehrspielerspiele</string>
+    <string name="multiplayer_banner_content">Spielen Sie mit anderen im Netzwerk! Sie müssen sich im selben WI-FI-Netzwerk befinden.\n\nDie Symbole oben links starten die verschiedenen Spiele. Da diese Spiele textbasiert sind, können Sie deren Sprachfunktion aktivieren, indem Sie auf das Lautsprechersymbol tippen.\n\nViel Spaß!</string>
+    <string name="adventure_game_welcome">Colossal cave adventure game!\n</string>
+</resources>

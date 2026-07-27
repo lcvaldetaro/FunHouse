@@ -1,0 +1,106 @@
+Number,Place,South,North,West,East,SW,SE,NW,NE,Up,Down,In,Out,Points,Status,Object Dependency,Message,Alternate Description,Description
+1,Command Bridge,8,0,3,2,0,0,0,0,0,16,0,0,10,,0,,,You are on the Command Bridge of Aegis Prime. Holographic tactical interfaces flicker around the captain's chair. A central command console overlooks the viewport. A heavy elevator lift goes down to Deck B.
+2,Ops Console Room,4,0,1,0,0,0,0,0,0,0,0,0,5,,0,,,"The Ops Console Room is filled with diagnostic monitors tracking the station's electrical grid and atmosphere. A doorway leads south, and the Bridge is to the west."
+3,Captain's Ready Room,5,0,0,1,0,0,0,0,0,0,0,0,5,,0,,,"A quiet ready room with a desk, a personal computer, and a glass-enclosed shelf displaying old space flight medals. The Bridge is to the east."
+4,Tactical Station,6,2,0,0,0,0,0,0,0,0,0,0,5,,0,,,The tactical station houses the targeting grids for the station's outer defense turrets. Doorways lead north and south.
+5,Communications Hub,7,3,0,0,0,0,0,0,0,0,0,0,5,,0,,,A room full of satellite and quantum dish controls. White noise static hums from the primary speakers. Doorways lead north and south.
+6,Server Room Alpha,0,4,8,0,0,0,0,0,0,0,0,0,5,,0,,,High-density server towers glow with blinking green lights. The temperature here is freezing cold. You can go north or west.
+7,Server Room Beta,0,5,0,8,0,0,0,0,0,0,0,0,5,,0,,,Blinking yellow warning lights reflect off the metal chassis of server racks processing data backups. You can go north or east.
+8,Central Junction A,9,1,7,6,0,0,0,0,0,0,0,0,5,,0,,,A wide corridor junction linking the Bridge to the server clusters and officer quarters.
+9,Officers Lounge,10,8,0,0,0,0,0,0,0,0,0,0,5,,0,,,"A comfortable common room for senior personnel, now littered with abandoned coffee mugs and datapad debris. Corridors lead north and south."
+10,Officers Quarters,0,9,12,11,0,0,0,0,0,0,0,0,10,dark,33,It is pitch dark here. You need a light source.,"The quarters of senior leadership. With your flashlight on, you can see a writing desk, an unmade bed, and a digital lockbox on a shelf.",The quarters of senior leadership. Everything is upturned and searched. It is completely dark.
+11,Chief Engineer Quarters,0,0,10,0,0,0,0,0,0,0,0,0,5,,0,,,The personal quarters of the chief engineer. Blueprints of the reactor core are plastered on the wall. The Officers Quarters lies to the west.
+12,Security Chief Quarters,0,0,0,10,0,0,0,0,0,0,0,0,5,,0,,,The secure quarters of the security chief. A weapons locker lies empty on the floor. The Officers Quarters lies to the east.
+13,Emergency Briefing Room,-14,0,0,0,0,0,0,0,0,0,0,0,5,,2,A heavy blast door to the south blocks access to the Annex. It requires the override key.,,An emergency briefing room. The exit to the south is blocked by a heavy electronic lock blast door. The hallway goes north.
+14,Secure Armory Annex,0,13,0,0,0,0,0,0,0,0,0,0,20,dark,33,It is pitch dark here. You need a light source.,The secure armory annex. Flashlight beams reveal weapons lockers and a Prototype Blaster in a glass showcase.,The highly secure armory vault. It is pitch dark here. An exit leads north.
+15,Observation Deck A,0,1,0,0,0,0,0,0,0,0,0,0,5,,0,,,A room with a massive reinforced window showing the stellar nebula and deep space outside. The Bridge is to the north.
+16,Central Lift Deck B,0,0,18,17,0,0,0,0,1,31,0,0,10,,0,,,You are at the Central Lift on Deck B. The lift connects Up to Deck A and Down to Deck C. Paths go west and east.
+17,Crew Common Room,19,20,16,0,0,0,0,0,0,0,0,0,5,,0,,,"The main gathering area for crew members. Corridors lead north, south, and west."
+18,Mess Hall,21,22,0,16,0,0,0,0,0,0,0,0,5,,0,,,"A large dining hall with benches and tables. Food ration machines line the walls. Exits lead north, south, and east."
+19,Galley,0,17,0,0,0,0,0,0,0,0,0,0,5,,0,,,The station's kitchen area. Pots and utensils are scattered everywhere. An exit leads north.
+20,Rec Room,17,0,0,0,0,0,0,0,0,0,0,0,5,,0,,,A recreation room with broken virtual reality pods and a billiard table. An exit leads south.
+21,Crew Quarters Block Alpha,0,18,0,0,0,0,0,0,0,0,0,0,5,,0,,,Rows of bunk beds for the crew. A medical kit sits on a counter. An exit leads north.
+22,Crew Quarters Block Beta,18,0,0,0,0,0,0,0,0,0,0,0,5,,0,,,More crew living quarters. An exit leads south.
+23,Medical Bay Lobby,24,0,0,25,0,0,0,0,0,0,0,0,10,,0,,,The lobby of Aegis Prime's medical facility. Exits lead south and east. A corridor to the west leads to the Lift.
+24,Medical Ward,0,23,0,0,0,0,0,0,0,0,0,0,5,,0,,,"A clean, sterile room with medical beds and scanning equipment. An exit leads north."
+25,Research Clinic,0,0,23,0,0,0,0,0,0,0,0,0,5,,0,,,A clinical research lab. Vials and microscopes sit on stainless steel desks. An exit leads west.
+26,Water Reclamation Facility,0,0,28,27,0,0,0,0,0,0,0,0,10,,0,,,"A facility filled with water tanks, pumps, and purifying grids. Exits lead west and east."
+27,Air Filtration Vault,0,0,26,0,0,0,0,0,0,0,0,0,5,,0,,,Massive industrial fans circulate air for Deck B. An exit leads west.
+28,Life Support Core,0,0,0,26,0,0,0,0,0,0,0,0,10,,0,,,"The main control hub for the station's gravity, oxygen, and pressure levels. An exit leads east."
+29,Waste Processing Unit,0,30,0,0,0,0,0,0,0,0,0,0,5,,0,,,A room designed for compressing garbage and waste. An exit leads north.
+30,Maintenance Corridor B,29,0,0,0,0,0,0,0,0,0,0,0,5,,0,,,A narrow metal corridor running behind the walls of Deck B. An exit leads south.
+31,Central Lift Deck C,0,0,33,32,0,0,0,0,16,46,0,0,10,,0,,,Central Lift on Deck C. Connects Up to Deck B and Down to Deck D. Exits lead east and west.
+32,Engineering Control Room,34,0,31,0,0,0,0,0,0,0,0,0,5,,0,,,Monitors display the status of the main fusion reactor. Exits lead south and west.
+33,Primary Generator Room,35,0,0,31,0,0,0,0,0,0,0,0,10,,0,,,A massive humming generator occupies the center of this room. Exits lead south and east.
+34,Power Grid Console,0,32,0,0,0,0,0,0,0,0,0,0,5,,0,,,Switches here route electrical power to the various decks. An exit leads north.
+35,Reactor Control Room,0,33,0,0,0,0,0,0,0,0,0,0,20,dark,33,It is pitch dark here. You need a light source.,"The reactor control room. In the flashlight beam, you see the reactor console and an auto-destruct lever.",The reactor control room. It is completely dark. An exit leads north.
+36,Auxiliary Generator,37,0,0,0,0,0,0,0,0,0,0,0,5,,0,,,A backup generator unit. A doorway leads south.
+37,Shield Generator Chamber,0,36,0,0,0,0,0,0,0,0,0,0,10,,0,,,A hum of static electricity fills the room from the shield generators. An exit leads north.
+38,Gravity Control Hub,0,0,0,39,0,0,0,0,0,0,0,0,10,,0,,,The control system for the station's artificial gravity plates. An exit leads east.
+39,Magnetic Harvester,0,0,38,0,0,0,0,0,0,0,0,0,5,,0,,,Equipment for harvesting stellar gases and particles. An exit leads west.
+40,Coolant Pump Station,41,0,0,0,0,0,0,0,0,0,0,0,5,,0,,,Pumps circulate liquid nitrogen to the reactor core. An exit leads south.
+41,Coolant Storage,0,40,0,0,0,0,0,0,0,0,0,0,5,,0,,,Pressurized tanks containing liquid coolant. An exit leads north.
+42,Workshop Alpha,0,0,43,0,0,0,0,0,0,0,0,0,5,,0,,,"A workshop containing tools, scrap metal, and workbenches. An exit leads west."
+43,Spare Parts Depot,0,0,0,42,0,0,0,0,0,0,0,0,5,,0,,,Shelves filled with mechanical components and spare parts. An exit leads east.
+44,High Voltage Station,0,45,0,0,0,0,0,0,0,0,0,0,5,,0,,,Transformer grids distributing high-voltage power. An exit leads north.
+45,Battery Bank,44,0,0,0,0,0,0,0,0,0,0,0,5,,0,,,Massive batteries designed to keep the station running during grid failure. An exit leads south.
+46,Central Lift Deck D,0,0,48,47,0,0,0,0,31,61,0,0,10,,0,,,Central Lift on Deck D. Connects Up to Deck C and Down to Deck E (Hangar). Exits lead east and west.
+47,Biology Lab,49,0,46,0,0,0,0,0,0,0,0,0,5,,0,,,A biological laboratory containing medical samples and incubators. Exits lead south and west.
+48,Cybernetics Lab,50,0,0,46,0,0,0,0,0,0,0,0,10,,0,,,A lab focused on cybernetic parts and artificial intelligence research. Exits lead south and east.
+49,Xenobiology Containment,0,47,0,0,0,0,0,0,0,0,0,0,10,,0,,,A high-security quarantine room with broken glass containment tubes. An exit leads north.
+50,Robotics Assembly,0,48,0,0,0,0,0,0,0,0,0,0,5,,0,,,Mechanical arms stand frozen over droid assembly tables. An exit leads north.
+51,Chemistry Lab,0,0,52,0,0,0,0,0,0,0,0,0,5,,0,,,"Beakers, chemical solutions, and test tubes are scattered on counters. An exit leads west."
+52,Hazardous Materials Depot,0,0,0,51,0,0,0,0,0,0,0,0,5,,0,,,A reinforced room for storing toxic chemicals. An exit leads east.
+53,Astrophysics Lab,54,0,0,0,0,0,0,0,0,0,0,0,5,,0,,,Star charts and telescope monitors are displayed on the screens. An exit leads south.
+54,Research Telescope Room,0,53,0,0,0,0,0,0,0,0,0,0,5,,0,,,A dome housing a massive optical telescope pointing out into deep space. An exit leads north.
+55,Research Labs Vault,0,0,0,56,0,0,0,0,0,0,0,0,20,dark,33,It is pitch dark here. You need a light source.,The research labs vault. Flashlight beams show titanium cases containing classified artifacts.,The research labs vault. It is pitch dark here. An exit leads east.
+56,Security Control Station D,0,0,-55,0,0,0,0,0,0,0,0,0,10,,49,The Vault door to the west is locked. It requires the cryo key.,,A security post overlooking the vault. The vault entrance is to the west and is locked by a heavy cryo-seal door.
+57,Quantum Physics Lab,0,58,0,0,0,0,0,0,0,0,0,0,5,,0,,,Equipment for analyzing quantum particles. An exit leads north.
+58,Particle Accelerator,57,0,0,0,0,0,0,0,0,0,0,0,10,,0,,,A circular metal pipe structure running around the room. An exit leads south.
+59,Botanical Lab,0,0,0,60,0,0,0,0,0,0,0,0,5,,0,,,Hydroponics equipment and soil bays for alien plant research. An exit leads east.
+60,Greenhouse,0,0,59,0,0,0,0,0,0,0,0,0,10,,0,,,A dome filled with overgrown vines and thick foliage. An exit leads west.
+61,Central Lift Deck E,0,0,63,62,0,0,0,0,46,0,0,0,10,,0,,,Central Lift on Deck E. Connects Up to Deck D. Exits lead east and west.
+62,Cargo Bay Alpha,64,0,61,0,0,0,0,0,0,0,0,0,5,,0,,,A massive cargo hold filled with crates and containers. Exits lead south and west.
+63,Cargo Bay Beta,0,0,0,61,0,65,0,0,0,0,0,0,5,,16,The Escape Pod door to the Southeast is locked. It requires the escape pod key.,,A cargo bay with shipping crates. The hangar escape pod bay door to the southeast is locked. An exit leads east.
+64,Loading Dock 1,0,62,0,0,0,0,0,0,0,0,0,0,5,,0,,,A shipping bay door leading out to open space. An exit leads north.
+65,Hangar Pod Bay,0,0,63,0,0,0,0,0,0,0,0,0,20,,0,,,The hangar bay housing emergency evacuation pods. An exit leads west to Cargo Bay Beta.
+66,Vehicle Bay,67,0,0,0,0,0,0,0,0,0,0,0,5,,0,,,A garage area for station service vehicles and cargo movers. An exit leads south.
+67,Repair Bay,0,66,0,0,0,0,0,0,0,0,0,0,5,,0,,,A maintenance pit with hydraulic lifts. An exit leads north.
+68,Cargo Storage Vault,0,0,0,69,0,0,0,0,0,0,0,0,10,,0,,,A highly secure storage vault containing heavy materials. An exit leads east.
+69,Decontamination Chamber E,0,0,68,0,0,0,0,0,0,0,0,0,5,,0,,,A small airlock chamber designed to clean inbound cargo. An exit leads west.
+70,Shuttle Docking Port A,0,71,0,0,0,0,0,0,0,0,0,0,5,,0,,,A docking tube where incoming transport ships clamp. An exit leads north.
+71,Airlock E-1,70,0,0,0,0,0,0,0,0,0,0,0,5,,0,,,An airlock chamber leading out to Shuttle Port A. An exit leads south.
+72,Shuttle Docking Port B,73,0,0,0,0,0,0,0,0,0,0,5,,0,,,,A secondary docking port for shuttles. An exit leads south.
+73,Airlock E-2,0,72,0,0,0,0,0,0,0,0,0,0,5,,0,,,An airlock leading to Shuttle Port B. An exit leads north.
+74,Fuel Tanker Port,0,0,75,0,0,0,0,0,0,0,0,0,5,,0,,,A coupling system designed to receive fuel from tankers. An exit leads west.
+75,Fuel Hose Station,0,0,0,74,0,0,0,0,0,0,0,0,5,,0,,,Controls for the fuel pumps feeding the station's main reserves. An exit leads east.
+76,SV Gatehouse,0,77,0,0,0,0,0,0,0,0,0,0,10,,0,,,The main security gatehouse leading into the Solar Vanguard military garrison. An exit leads north.
+77,SV Outer Perimeter,76,78,0,0,0,0,0,0,0,0,0,0,5,,0,,,A fortified hallway guarded by automated turrets. Exits lead north and south.
+78,SV Barracks Alpha,77,0,0,79,0,0,0,0,0,0,0,0,5,,0,,,"Bunk beds, steel lockers, and military gear. Exits lead south and east."
+79,SV Barracks Beta,80,0,78,0,0,0,0,0,0,0,0,0,5,,0,,,Additional troop quarters. Exits lead south and west.
+80,SV Officers Quarters,0,79,0,0,0,0,0,0,0,0,0,0,5,,0,,,Quarters for the Vanguard commanders. An exit leads north.
+81,SV Armory,0,0,82,0,0,0,0,0,0,0,0,0,10,,0,,,Heavy steel racks designed to hold military rifle equipment. An exit leads west.
+82,SV Shooting Range,0,0,0,81,0,0,0,0,0,0,0,0,5,,0,,,A target practice range with metal scoring booths. An exit leads east.
+83,SV Mess Hall,84,0,0,0,0,0,0,0,0,0,0,0,5,,0,,,A dining facility for the garrison forces. An exit leads south.
+84,SV Command Post,0,83,0,85,0,0,0,0,0,0,0,0,10,,0,,,The tactical command center of the Solar Vanguard. Monitors show tactical grids. Exits lead north and east.
+85,SV Communication Array,0,0,84,0,0,0,0,0,0,0,0,0,5,,0,,,Long-range transmitters linking the garrison back to Earth military command. An exit leads west.
+86,Infested Hatchery Entrance,0,87,0,0,0,0,0,0,0,0,0,0,10,,0,,,"Corridor walls are coated in a thick, organic mucus. A dark path leads north."
+87,Mucus Corridor Alpha,86,0,0,88,0,0,0,0,0,0,0,0,5,,0,,,The floor is sticky with alien secretions. Exits lead south and east.
+88,Mucus Corridor Beta,0,89,87,0,0,0,0,0,0,0,0,0,5,,0,,,Bioluminescent fungi grow on the wall panels. Exits lead north and west.
+89,Spore Chamber,88,0,90,0,0,0,0,0,0,0,0,0,10,,0,,,Clouds of yellow organic spores float in the air. Exits lead south and west.
+90,Xenophage Hive Corridor,0,91,0,89,0,0,0,0,0,0,0,0,5,,0,,,Alien webbing wraps the hallway structure. Stolen military plans lie on the ground. Exits lead north and east.
+91,Acid Pool Room,90,0,0,92,0,0,0,0,0,0,0,0,10,,0,,,A puddle of bubbling green acid eats through the deck plates. Exits lead south and east.
+92,Egg Incubator,93,0,91,0,0,0,0,0,0,0,0,0,10,,0,,,Dozens of soft-shelled alien eggs lie nestled in organic pods. Exits lead south and west.
+93,Biomass Bio-Dome,0,92,94,0,0,0,0,0,0,0,0,0,5,,0,,,A research dome completely overgrown with alien vines. Exits lead north and west.
+94,Hive Queen Chamber Entrance,0,95,0,93,0,0,0,0,0,0,0,0,10,,0,,,A heavy door coated in alien slime. A loud screeching can be heard from the north. Exits lead north and east.
+95,Hive Queen Chamber,0,94,0,0,0,0,0,0,0,0,0,0,20,dark,33,It is pitch dark here. You need a light source.,"The Hive Queen Chamber. The flashlight reveals a massive, screeching Xenophage Queen sitting on a pile of bones.",The Hive Queen Chamber. It is pitch dark and smells of organic decay. An exit leads south.
+96,ML Gate Control,0,97,0,0,0,0,0,0,0,0,0,0,10,,0,,,The entrance to the droid-controlled sector. Holographic lasers guard the gate. An exit leads north.
+97,ML Droid Assembly Line,96,0,98,0,0,0,0,0,0,0,0,0,5,,0,,,Robotic cranes stand frozen over disassembled droid parts. Exits lead south and west.
+98,ML Repair Bay,0,99,0,97,0,0,0,0,0,0,0,0,5,,0,,,Workstations designed to repair combat droids. Exits lead north and east.
+99,ML Charging Station,98,0,0,100,0,0,0,0,0,0,0,0,5,,0,,,Electric cables hang from the ceiling in front of charging bays. Exits lead south and east.
+100,ML Central Junction,0,101,99,0,0,0,0,0,0,0,0,0,5,,0,,,A hub connecting different parts of the droid sector. Exits lead north and west.
+101,ML Logic Processing,100,0,-102,0,0,0,0,0,0,0,0,0,10,,12,The Mainframe Hub door to the west is locked. It requires the decryption disk.,,Compute terminals hum as they process station algorithms. The entrance to the west is locked by an encryption seal.
+102,ML Mainframe Hub,0,103,0,101,0,0,0,0,0,0,0,0,20,dark,33,It is pitch dark here. You need a light source.,"The ML Mainframe Hub. With the flashlight, you can see mainframe towers and a central console containing data drives.",The ML Mainframe Hub. It is pitch dark here. An exit leads east.
+103,ML Data Banks,102,0,0,104,0,0,0,0,0,0,0,0,5,,0,,,Servers containing backups of the rogue AI. Exits lead south and east.
+104,ML Core Vault,105,0,103,0,0,0,0,0,0,0,0,0,10,,0,,,The vault housing the mainframe's central core. Exits lead south and west.
+105,ML Core,104,0,0,0,0,0,0,0,0,0,0,0,20,,0,,,The physical mainframe core of Aegis Prime. The mainframe core item sits in the center. An exit leads north.

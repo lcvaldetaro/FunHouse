@@ -1,0 +1,12 @@
+Number,Place,South,North,West,East,SW,SE,NW,NE,Up,Down,In,Out,Points,Status,Object dependency,Message,Alternate description,Description
+1, Hall of Optical Illusions. ,,3,,2,,,,,,,,,,,,,, Hall of Optical Illusions. 
+2,Makeshift Klown Kart Racing Chamber. ,,,3,,,,,,,,,,,,,,,Makeshift Klown Kart Racing Chamber. 
+3,Hall of Ghostly Frivolity and Art,1,5,4,2,,,,,,,,,,dark,6,,This room is dark,Hall of Ghostly Frivolity and Art
+4,Rickety Stairs to the Basement,,,,3,,,,,,,,,,,,,,Rickety Stairs to the Basement
+5,Blood-shock Hall of Doom 1,3,6,7,-8,,,,,,,,,,,,You cannot enter. The door is locked.,,Blood-shock Hall of Doom 1
+6,Blood-shock Hall of Doom 2,5,9,10,11,,,,,,,,,,,,,,Blood-shock Hall of Doom 2
+7,The Bemusing Musical Room of Merry Amusement,,,,5,,,,,,,,,,,,,,The Bemusing Musical Room of Merry Amusement
+8,The Hellhound's Enclosure ,,,5,,,,,,,,,,,,,,,The Hellhound's Enclosure 
+9,Upstairs to second floor,6,,,,,,,,,,,,,,,,,Upstairs to second floor
+10,Conspicious Trap Door,,,,6,,,,,,,,,,,,,,Conspicious Trap Door
+11,The Scorching Cell,,,6,,,,,,,,,,,,,,,The Scorching Cell

@@ -1,0 +1,9 @@
+Title,Lost Island adventure,This is the title of the adventure
+Places file,islandplaces,This defines the excel comma-delimited-file that contains the places of the game
+Objects file,islandobjects,This defines the excel comma-delimited-file that contains the objects of the game
+Goals file,islandgoals,This defines the excel comma-delimited-file that contains the goals of the game
+Maximum Objects Carried,5,This defines how many objects can be carried by the player
+savefile,island,This is the prefix of the filename of files for saved games
+helpfile,island.md,This is the filename of the html help file
+Description,Your are in a lost island.,A description for the game
+Start Places,"1,6, 14,16,19,25","These are possible starting locations, randomly selected"

@@ -1,0 +1,2 @@
+Number,Obectivename,Finish Game,Points Awarded to owner,Ponts awared to non-owner,Verbs,Location,Object,text,Loc Dep,Obj Dependency,Obj Incompatible,Error text,Non owner text,Description,,
+1,Escape the house alive.,y,400,70,start,1,,,,"1,2,3",,You are not ready,"OK, the airplane is started, but you don't know how to fly a plane. What now?","The airplane started, and you graciously took off from the clearing. Congratulations!!!  You have finished the game, and you have proved yourself to be an andventurist. ",,

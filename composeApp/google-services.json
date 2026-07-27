@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "302994117926",
+    "project_id": "funhouse-c8fcb",
+    "storage_bucket": "funhouse-c8fcb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:302994117926:android:77dc221dbbca7aa8791de7",
+        "android_client_info": {
+          "package_name": "club.gepetto.gamecollection"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUV3lhzHMeoUF9e-BGRKS5T7OScmVrHFM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:302994117926:android:bbe1ee7f7f58abea791de7",
+        "android_client_info": {
+          "package_name": "com.gepetto.gamescollection"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUV3lhzHMeoUF9e-BGRKS5T7OScmVrHFM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

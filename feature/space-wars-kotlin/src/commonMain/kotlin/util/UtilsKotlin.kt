@@ -1,0 +1,106 @@
+package spacewarskotlin.utils
+
+
+import com.funhouse.shared.common.models.Direction
+import com.funhouse.shared.common.models.DownloadableFile
+import com.funhouse.shared.common.models.Game
+import com.funhouse.shared.common.models.GameType
+import com.funhouse.shared.common.models.GameGenre
+import com.funhouse.shared.common.models.LocalGame
+import com.funhouse.shared.common.utils.installFile
+import jni.SpaceWarsKotlin
+
+fun installFiles() {
+    try {
+        installFile("spacewars.md")
+        installFile("filelist.xml")
+        installFile("themedata.thmx")
+        installFile("bsdlicense.txt")
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+val defaultAbout = """
+Copyright (c) 1980, 1993
+The Regents of the University of California.  All rights reserved.
+ 
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. Neither the name of the University nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+ 
+THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+ 
+C version by Eric P. Allman 5/76 (U.C. Berkeley) with help from Jeff Poskanzer and Pete Rubinstein.
+
+Please send comments, questions, and suggestions about this
+game to:
+    Eric P. Allman
+    Project INGRES
+    Electronics Research Laboratory
+    Cory Hall
+    University of California
+    Berkeley, California  94720
+    
+FORTRASH version by Kay R. Fisher (DEC) "and countless others".
+That was adapted from the "original BASIC program" (ha!) by Mike Mayfield (Centerline Engineering).
+
+Additional inspiration taken from FORTRAN version by David Matuszek and Paul Reynolds which runs on the CDC 7600 at Lawrence Berkeley Lab, maintained there by Andy Davidson.
+This version is also available at LLL and at LMSC.  In all fairness, this version was the major inspiration for this version of the game 
+
+Minor other input from the "Battelle Version 7A" by Joe Miller (Graphics Systems Group, Battelle-Columbus Labs) and Ross Pavlac (Systems Programmer, Battelle Memorial Institute).
+That version was written in December '74 and extensively modified June '75.  It was adapted from the FTN version by Ron Williams of CDC Sunnyvale, which was adapted from the Basic version distributed by DEC.
+It also had "neat stuff swiped" from T. T. Terry and Jim Korp (University of Texas), Hicks (Penn U.), and Rick Maus (Georgia Tech).  Unfortunately, it was not as readable as it could have been and so the translation effort was severely hampered.
+
+Permission is given for use, copying, and modification of all or part of this program and related documentation, provided that all reference to the authors are maintained.
+        
+Converted to Kotlin by Valdetaro Consulting, LLC in 2026.        
+""".trimIndent()
+
+val defaultSpaceWarsDirections : List<Direction> =
+    listOf(
+        Direction("help", "?"),
+        Direction("Save", "save"),
+        Direction("Restart", "restart"),
+        Direction("Status", "status"),
+        Direction("about", "about"),
+    )
+
+val defaultGame = Game(
+    nickName = "spacewars",
+    library = "gepetto.spacewars",
+    gameGenre = GameGenre.SPACE,
+    title = "Space Wars",
+    version = "1.12",
+    gameType = GameType.SKILL,
+    composableTextGame = true,
+    gameClass = SpaceWarsKotlin(),
+    forceDark = true,
+    helpFile = DownloadableFile("spacewars.md"),
+    directions = defaultSpaceWarsDirections,
+    directionColumns = 5,
+    about = defaultAbout,
+    licenseFile = DownloadableFile("bsdlicense.txt"),
+    localGame = LocalGame(
+        icon = 0,
+        image = 0,
+    )
+)

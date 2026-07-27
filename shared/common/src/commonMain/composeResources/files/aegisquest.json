@@ -1,0 +1,119 @@
+{
+  "gameName": "aegisquest",
+  "nickName": "aegisquest",
+  "library": "gepetto.gensrv",
+  "title": "Aegis Quest",
+  "menuTitle": "Aegis Quest",
+  "description": "Infiltrate the besieged Aegis Prime Space Station. Choose your faction, navigate dark decks, hack control terminals, and secure critical station modules to win the orbital war.",
+  "about": "(c) Copyright 2026 Valdetaro Consulting, LLC.",
+  "version": "2.0",
+  "greeting": "Welcome to Aegis Quest on Aegis Prime Station!",
+  "maxObjects": 5,
+  "startPlaces": [
+    1,
+    16,
+    31,
+    46,
+    61,
+    76,
+    86,
+    96
+  ],
+  "saveFilePrefix": "aegisquest",
+  "mainGameFile": {
+    "fileName": "aegisquest.csv"
+  },
+  "placesFile": {
+    "fileName": "aegisquestplaces.csv"
+  },
+  "objectsFile": {
+    "fileName": "aegisquestobjects.csv"
+  },
+  "goalsFile": {
+    "fileName": "aegisquestgoals.csv"
+  },
+  "gameImage": {
+    "fileName": "aegisquest.png"
+  },
+  "helpFile": {
+    "fileName": "aegisquest.md"
+  },
+  "licenseFile": {
+    "fileName": "funhouselicense.txt"
+  },
+  "directionColumns": 6,
+  "directions": [
+    {
+      "label": "S",
+      "command": "south"
+    },
+    {
+      "label": "N",
+      "command": "north"
+    },
+    {
+      "label": "W",
+      "command": "west"
+    },
+    {
+      "label": "E",
+      "command": "east"
+    },
+    {
+      "label": "NW",
+      "command": "nw"
+    },
+    {
+      "label": "NE",
+      "command": "ne"
+    },
+    {
+      "label": "SE",
+      "command": "se"
+    },
+    {
+      "label": "SW",
+      "command": "sw"
+    },
+    {
+      "label": "Yes",
+      "command": "yes"
+    },
+    {
+      "label": "No",
+      "command": "no"
+    },
+    {
+      "label": "Up",
+      "command": "up"
+    },
+    {
+      "label": "Down",
+      "command": "down"
+    },
+    {
+      "label": "In",
+      "command": "in"
+    },
+    {
+      "label": "Out",
+      "command": "out"
+    },
+    {
+      "label": "Look",
+      "command": "look"
+    },
+    {
+      "label": "Inv",
+      "command": "inventory"
+    },
+    {
+      "label": "Help",
+      "command": "help"
+    },
+    {
+      "label": "About",
+      "command": "about"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+Title,Fun House adventure,This is the title of the adventure
+Places file,funhouseplaces,This defines the excel command-delimited-file that contains the places of the game
+Objects file,funhouseobjects,This defines the excel command-delimited-file that contains the objects of the game
+Goals file,funhousegoals, This defines the excel comma-delimited-file that contains the goals of the game
+savefile,funhouse,This is the prefix of the filename of files for saved games
+maximum objects carried,5,This is the maximum number of objects that the player can carry
+Greeting,,Welcome to the Fun House!
+Description,It is a fun house with lots of entertainment. I hope you can escape alive!,
+helpfile,funhouse.md,This is the filename of the html help file
+Start Places,"1","These are possible starting locations, randomly selected"

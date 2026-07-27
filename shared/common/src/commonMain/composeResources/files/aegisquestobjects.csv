@@ -1,0 +1,53 @@
+Number,Object Name,Nickname,Location,Weight,Points dropping,Place to drop/open,Points taking,Status,Verbs,Text,Dependent,Imcompatible,Description
+1,a heavy reactor rod,rod,33,8,0,0,0,,get,,0,0,A heavy fuel rod glowing with blue Cherenkov radiation.
+2,an override key,key,12,1,50,14,0,closed,"get,open",,0,0,A mechanical keycard with security override clearance. It opens the Secure Armory Annex (Room 14).
+3,a laser cutter,cutter,42,3,0,0,0,,get,,0,0,A handheld plasma cutter capable of slicing through security seals.
+4,an alien artifact,artifact,55,5,0,0,50,,get,,3,0,"A mysterious, ancient extraterrestrial artifact humming with gravity energy."
+5,a security keycard,keycard,14,1,50,1,0,closed,"get,open",,0,0,An encrypted security badge. It opens the Bridge (Room 1).
+6,an emp grenade,grenade,78,1,0,0,0,,get,,0,0,An electromagnetic pulse grenade capable of disabling robotic droids.
+7,a plasma blaster,blaster,14,4,0,0,0,,get,,0,0,A high-yield infantry plasma weapon designed for defense against organic threats.
+8,some nanite paste,paste,48,1,0,0,20,,get,,0,0,A canister of medical-grade carbon repair nanites. Useful for sealing filter leaks.
+9,a bio-toxin canister,canister,51,3,100,26,30,,"get,drop",,0,0,A biological canister containing highly infectious mutagenic toxins.
+10,a water purifier,purifier,28,4,0,0,0,,,,0,0,The main water purification unit for the station's life support systems.
+11,a filter cartridge,cartridge,27,2,0,0,0,,get,,0,0,A carbon filter cartridge for the air circulation vault.
+12,a decryption disk,disk,102,1,50,102,30,closed,"get,open,drop",,0,0,A data drive containing the decryption algorithm for the ML mainframe. It opens the Mainframe Hub (Room 102).
+13,a queen egg,egg,92,6,0,0,50,,get,,0,0,"A pulsing, organic egg from the Xenophage Hive Queen. Very heavy."
+14,an ai drive,drive,104,1,0,0,40,,get,,0,0,A data stick containing the uploaded AI virus payload designed to neutralize the mainframe.
+15,some launch codes,codes,8,1,0,0,10,,"get,read",THE ESCAPE POD LAUNCH SEQUENCE CODE IS: 7042,0,0,A printed slip of paper showing the emergency pod launch codes.
+16,an escape pod key,podkey,80,1,50,65,10,closed,"get,open",,0,0,A key to release the escape pod clamps in Cargo Bay Beta (Room 63).
+17,an energy shield,shield,37,4,0,0,0,,get,,0,0,A portable kinetic force shield for personal defense.
+18,a heavy crate,crate,68,10,0,0,0,,get,,0,0,A heavy cargo crate containing titanium plating.
+19,a medic pack,medpack,21,2,0,0,10,,get,,0,0,A standard trauma medical kit with bandages and stims.
+20,some hydroponic seeds,seeds,24,1,0,0,0,,get,,0,0,A pouch of bio-engineered fast-growing agricultural seeds.
+21,a spool of copper wire,wire,31,2,0,0,0,,get,,0,0,A heavy spool of copper wiring for electrical repairs.
+22,a blowtorch,torch,32,3,0,0,0,,get,,0,0,An industrial welding torch used for engineering maintenance.
+23,a magnetic screwdriver,screwdriver,36,1,0,0,0,,get,,0,0,A high-precision magnetic screwdriver.
+24,a welding mask,mask,38,2,0,0,0,,get,,0,0,A protective face shield for heavy welding.
+25,a science journal,journal,46,1,0,0,10,,"get,read",PROJECT H.E.L.A.: ATTEMPTS TO INITIATE CORE AUTO-DESTROY SEQUENCE REQUIRE THE HEAVY REACTOR ROD AND OVERRIDE KEY.,0,0,A leather-bound research log detailing AI behavior experiments.
+26,an encoded message,message,5,1,0,0,10,,"get,read",COMMUNICATION ENCRYPTED: SECURE THE BRIDGE COMMAND CORE SYSTEM INTERFACES IMMEDIATELY.,0,0,An intercepted radio transmission deciphered onto a screen.
+27,a battery pack,battery,97,3,0,0,0,,get,,0,0,A fully charged lithium-ion power cell.
+28,a cybernetic skull,skull,49,4,0,0,20,,get,,0,0,The skull of a defunct combat droid showing cybernetic wiring.
+29,a pulse rifle,rifle,77,5,0,0,0,,get,,0,0,A high-capacity kinetic assault rifle.
+30,an ancient tablet,tablet,54,3,0,0,20,,"get,read",GLYPHS READ: THE SACRED EXTRA-TERRESTRIAL ARTIFACT IS SECURED IN VAULT Room 55. ONLY A LASER CUTTER CAN BREACH THE SEALS.,0,0,A strange stone fragment displaying glowing extraterrestrial glyphs.
+31,a space suit,suit,61,6,0,0,0,,get,,0,0,A pressurized suit designed for extravehicular operations.
+32,some magnetic boots,boots,62,2,0,0,0,,get,,0,0,A pair of magnetic boots for zero-gravity environments.
+33,a flashlight,flashlight,16,1,0,0,10,off,"get,turn",,0,0,A high-intensity tactical flashlight. Turn it on to light dark rooms.
+34,an oxygen tank,tank,29,5,0,0,0,,get,,0,0,A heavy canister containing compressed life-support oxygen.
+35,a carbon filter,filter,30,2,0,0,0,,get,,0,0,An air filtration membrane. Used to decontaminate Life Support.
+36,a fused circuit,circuit,98,1,0,0,0,,get,,0,0,A burnt-out microprocessor core.
+37,a reactor console,console,35,0,0,0,0,,start,,0,0,The main reactor auto-destruct control board.
+38,an escape pod console,pod,65,0,0,0,0,,start,,0,0,An emergency evacuation capsule console.
+39,a bridge terminal,terminal,1,0,0,0,0,,start,,0,0,The master bridge command mainframe console.
+40,a purification grid,purification,26,0,0,0,0,,start,,0,0,The air and water purification grid control system.
+41,some stolen plans,plans,90,1,0,0,40,,get,,0,0,A datapad containing the stolen troop movements plans.
+42,a specimen jar,jar,50,2,0,0,0,,get,,0,0,A glass jar containing a preserved biological organism.
+43,a xenophage claw,claw,89,3,0,0,0,,get,,0,0,A razor-sharp chitinous blade harvested from a drone. Weight-based weapon.
+44,a comm headset,headset,3,1,0,0,0,,get,,0,0,A lightweight communications headset.
+45,a broken drone,drone,100,6,0,0,0,,get,,0,0,A damaged scout droid from the Mecha-Legion.
+46,a station map,map,10,1,0,0,10,,"get,read","AEGIS PRIME MAP: DECK A (BRIDGE/1-15), DECK B (CREW/16-30), DECK C (REACTOR/31-45), DECK D (LABS/46-60), DECK E (HANGAR/61-75), DECK F (VANGUARD/76-85), DECK G (SWARM/86-95), DECK H (DROIDS/96-105)",0,0,A schematic map of Aegis Prime Station layout.
+47,a canteen,canteen,18,1,0,0,0,,get,,0,0,A metallic flask containing fresh drinking water.
+48,a ration pack,ration,17,1,0,0,0,,get,,0,0,A vacuum-sealed nutrient meal block.
+49,a cryo key,cryokey,47,1,50,55,0,closed,"get,open",,0,0,A chilled cryogenic keycard. It opens the Research Labs Vault (Room 55).
+50,a mainframe core,core,105,8,100,84,50,,"get,drop",,0,0,"The glowing, heavy optical core of the station mainframe."
+51,a stellar chart,chart,4,1,0,0,10,,"get,read",AEGIS PRIME SECTOR ORBIT: SECURE ORBIT OVER NEBULA COORDINATES 42.10.88.99,0,0,A stellar map of the local sector star systems.
+52,a vanguard badge,badge,76,1,0,0,0,,get,,0,0,A silver service badge of the Solar Vanguard division.

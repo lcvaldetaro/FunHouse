@@ -1,0 +1,9 @@
+Title,Space Station Aegis,Title of the adventure
+Places file,aegisquestplaces,Places definition
+Objects file,aegisquestobjects,Objects definition
+Goals file,aegisquestgoals,Goals definition
+Maximum Objects Carried,5,Inventory limit
+savefile,aegisquest,Savegame file prefix
+helpfile,aegisquest.md,Help HTML file
+Description,"A battle for control of Aegis Prime Station between Solar Vanguard, Xenophage Swarm, and Mecha-Legion.",Description
+Start Places,"1,16,31,46,61,76,86,96",Starting rooms

@@ -1,0 +1,15 @@
+package com.funhouse.shared.common.jni
+
+expect fun playBicycle()
+expect fun haltBicycle()
+expect fun playCoin()
+expect fun playBell()
+expect fun playJackpot()
+expect fun playJackpotBigger()
+expect fun playJackpotMusic()
+expect fun playTennisBall()
+expect fun playFlip()
+expect fun playChip()
+expect fun playBump()
+expect fun playBoing()
+expect fun playDice()

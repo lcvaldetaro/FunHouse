@@ -1,0 +1,8 @@
+Number,Object Name,Nickname,Location,Weight,Points dropping,Place to drop/open,Points Taking,Status,Verbs,Text,,,Description
+1,a heavy engine,engine,6,,,,,10,get,,,,It is a MERCURY 720 engine.
+2,a golden key,key,2,,,8,,10,"get,open",,,,Look at your house key.
+3,an iron can,can,10,,,,,10,get,,,,It is a medium size green army fuel can.
+4,some food,food,10,,,,,10,get,,,,It smells like a fried chicken.
+5,a sign,sign,1,,,,,10,read,You have been warned!,,,a sign on the wall
+6,a lamp,lamp,1,,,,10,off,"get,turn",,,,It is an electric lamp
+7,an iron door,door,5,,,,10,,,,,,Just a closed door.
