@@ -14,7 +14,7 @@
     <string name="arcade_title">Jeux d\'arcade</string>
     <string name="adventure_title">Jeux d\'aventure</string>
 
-    <string name="about_game">À propos de %s</string>
+    <string name="about_game">À propos de %1$s</string>
     <string name="privacy_policy_title">Politique de confidentialité</string>
     <string name="version_text">%1$s\nversion %2$s</string>
     <string name="cached">Mis en cache</string>
