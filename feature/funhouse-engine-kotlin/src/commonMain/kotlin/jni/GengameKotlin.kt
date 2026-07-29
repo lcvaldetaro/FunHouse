@@ -118,6 +118,7 @@ class GengameKotlin : BaseKotlinGame() {
     internal val players = GcConcurrentMap<Int, PlayerInstance>()
     private val playerInputQueues = GcConcurrentMap<Int, GcQueue<String>>()
     private val playerThreads = GcConcurrentMap<Int, GcThreadRef>()
+    private var networkInitThread: GcThreadRef? = null
 
     private val activePlayerIdx: Int
         get() = activePlayerIndex.get() ?: 1
@@ -314,6 +315,13 @@ class GengameKotlin : BaseKotlinGame() {
         playerThreads.clear()
 
         try {
+            networkInitThread?.interrupt()
+        } catch (e: Exception) {
+            GcLog.e("Failed to interrupt network init thread", e)
+        }
+        networkInitThread = null
+
+        try {
             serverInstance?.stop()
         } catch (e: Exception) {
             GcLog.e("Failed to stop server instance", e)
@@ -344,7 +352,7 @@ class GengameKotlin : BaseKotlinGame() {
         networkActive = true
         this.gameNickName = gameNickName
 
-        gcThread(name = "GameNetworkInitThread") {
+        networkInitThread = gcThread(name = "GameNetworkInitThread") {
             val settings = com.funhouse.shared.common.models.currentSettings
             if (settings.playerHandle.trim().isEmpty() && !isUnitTest) {
                 myPrintf("Please enter your player handle:\n")
@@ -980,7 +988,7 @@ class GengameKotlin : BaseKotlinGame() {
                 }
             }
 
-            if (autoSave == 1) {
+            if (autoSave == 1 && iverb != 19) {
                 saveGame(silent = true)
             }
         }
@@ -1954,7 +1962,8 @@ class GengameKotlin : BaseKotlinGame() {
     }
 
     private fun saveGame(silent: Boolean = false) {
-        val filename = if (argv.size > 1) "${saveFile}_${argv[1]}.json" else "${saveFile}.json"
+        val modeSuffix = if (isMultiplayer) "_multi" else "_single"
+        val filename = if (argv.size > 1) "${saveFile}${modeSuffix}_${argv[1]}.sav.json" else "${saveFile}${modeSuffix}.sav.json"
         try {
             val state = GameSaveState(
                 objPosition = objPosition.toList(),
@@ -1979,8 +1988,23 @@ class GengameKotlin : BaseKotlinGame() {
     }
 
     private fun restoreGame(silent: Boolean = false): Boolean {
-        val filename = if (argv.size > 1) "${saveFile}_${argv[1]}.json" else "${saveFile}.json"
-        val savedText = com.funhouse.shared.common.utils.readTextFromFile("$gameFolder/$filename")
+        val modeSuffix = if (isMultiplayer) "_multi" else "_single"
+        val filename = if (argv.size > 1) "${saveFile}${modeSuffix}_${argv[1]}.sav.json" else "${saveFile}${modeSuffix}.sav.json"
+        var savedText = com.funhouse.shared.common.utils.readTextFromFile("$gameFolder/$filename")
+        if (savedText == null) {
+            val oldFilename = if (argv.size > 1) "${saveFile}${modeSuffix}_${argv[1]}.json" else "${saveFile}${modeSuffix}.json"
+            val oldText = com.funhouse.shared.common.utils.readTextFromFile("$gameFolder/$oldFilename")
+            if (oldText != null && oldText.trim().startsWith("{\"objPosition\"")) {
+                savedText = oldText
+            }
+        }
+        if (savedText == null) {
+            val fallbackFilename = if (argv.size > 1) "${saveFile}_${argv[1]}.json" else "${saveFile}.json"
+            val fallbackText = com.funhouse.shared.common.utils.readTextFromFile("$gameFolder/$fallbackFilename")
+            if (fallbackText != null && fallbackText.trim().startsWith("{\"objPosition\"")) {
+                savedText = fallbackText
+            }
+        }
         if (savedText == null) {
             val legacyFilename = if (argv.size > 1) "${saveFile}_${argv[1]}.gameengsav" else "${saveFile}.gameengsav"
             val legacyText = com.funhouse.shared.common.utils.readTextFromFile("$gameFolder/$legacyFilename")
@@ -1988,6 +2012,7 @@ class GengameKotlin : BaseKotlinGame() {
                 return restoreLegacyGame(legacyText, silent)
             }
             if (!silent) {
+                myPrintf("Error restoring game.\n")
                 myPrintf("No saved game file found.\n")
             }
             return false

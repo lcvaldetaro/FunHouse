@@ -37,6 +37,7 @@ actual fun saveTextToFile(fileName: String, text: String) {
     try {
         val packageFolder = AppData.packageFolder
         val destFile = File(packageFolder, fileName)
+        destFile.parentFile?.mkdirs()
         destFile.writeText(text)
     } catch (e: Exception) {
         e.printStackTrace()
