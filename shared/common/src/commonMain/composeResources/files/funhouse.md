@@ -12,7 +12,7 @@
 
         
 
-You find yourself trapped inside a strange and mysterious Fun House. Move through the hall of mirrors, climb ladders, dig up hidden areas, unlock secret passages using keys, and complete your assigned mission to find the escape exit!
+You find yourself trapped inside a strange and mysterious Fun House. Move through the hall of mirrors, climb ladders, dig up hidden areas, unlock secret passages using keys, and complete your assigned goal!
 
         
 
