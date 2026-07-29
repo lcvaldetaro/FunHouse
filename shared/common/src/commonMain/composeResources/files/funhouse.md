@@ -67,7 +67,3 @@ Move between locations using cardinal directions:
 
 ---
 
-        
-            
-
-Black Gate Coderz Group / CyberDaemon
