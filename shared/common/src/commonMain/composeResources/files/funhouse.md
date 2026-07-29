@@ -55,6 +55,7 @@ Move between locations using cardinal directions:
 * **score** - Show your current achievements and points.
 * **goal** (or **goals**) - Display your active mission goal.
 * **players** - List all the current players in the game.
+* **places** - List all the available locations in the game.
 * **save** - Save your progress.
 * **restore** / **load** - Reload your last saved game state.
 * **newhandle** *<nickname>* - Change player name and randomize character roles.

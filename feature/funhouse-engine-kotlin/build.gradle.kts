@@ -58,6 +58,11 @@ kotlin {
                 implementation(libs.java.websocket)
             }
         }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
     }
 
 

@@ -62,7 +62,7 @@ class GengameKotlin : BaseKotlinGame() {
         "NW", "NE", "SCORE", "ASK", "LIST",
         "GRAB", "INITIALIZE", "KILL", "FIGHT", "ARREST",
         "REPAIR", "FIX", "BATTLE", "MOVE", "GO",
-        "INSIDE", "OUTSIDE", "GOAL", "GOALS", "PLAYERS"
+        "INSIDE", "OUTSIDE", "GOAL", "GOALS", "PLAYERS", "PLACES"
     )
 
     private val conjuTable = arrayOf(
@@ -997,7 +997,9 @@ class GengameKotlin : BaseKotlinGame() {
             "Save the game by saying 'save', restore it by saying 'restore'.\n" +
             "To see what you are carrying say 'Inventory'.\n" +
             "To repeat a description of a room, say 'look'.\n" +
-            "To check the score, say 'score'. To quit say 'quit'.\n"
+            "To check the score, say 'score'. To quit say 'quit'.\n\n" +
+            "Available commands:\n" +
+            "N, S, E, W, LOOK, GET, DROP, DIG, OPEN, CLOSE, UNLOCK, READ, LOAD, SAVE, START, TURN, TAKE, LEAVE, RESTORE, ?, HELP, INVENTORY, WHERE, ENTER, QUIT, NORTH, SOUTH, EAST, WEST, IN, OUT, UP, DOWN, SW, SE, NW, NE, SCORE, ASK, LIST, GRAB, INITIALIZE, KILL, FIGHT, ARREST, REPAIR, FIX, BATTLE, MOVE, GO, INSIDE, OUTSIDE, GOAL, GOALS, PLAYERS, PLACES\n"
         )
     }
 
@@ -1132,8 +1134,8 @@ class GengameKotlin : BaseKotlinGame() {
             isverb = checkVerbSynonym(isverb)
         }
 
-        // Single-word action verbs (where / in / out / up / down / load / save / restore / goal / players)
-        if (isverb == 23 || isverb == 30 || isverb == 31 || isverb == 32 || isverb == 33 || isverb == 14 || isverb == 19 || isverb == 53 || isverb == 55) {
+        // Single-word action verbs (where / in / out / up / down / load / save / restore / goal / players / places)
+        if (isverb == 23 || isverb == 30 || isverb == 31 || isverb == 32 || isverb == 33 || isverb == 14 || isverb == 19 || isverb == 53 || isverb == 55 || isverb == 56) {
             iverb = isverb
             argc = 1
             return
@@ -1156,7 +1158,7 @@ class GengameKotlin : BaseKotlinGame() {
         iverb = isverb
 
         // Verbs that must have no second word
-        if (iverb < 5 || iverb == 13 || (iverb in 19..24) || (iverb in 30..38) || iverb == 53 || iverb == 55) {
+        if (iverb < 5 || iverb == 13 || (iverb in 19..24) || (iverb in 30..38) || iverb == 53 || iverb == 55 || iverb == 56) {
             if (argc > 1) myErr = 3
             return
         }
@@ -1249,6 +1251,7 @@ class GengameKotlin : BaseKotlinGame() {
             25 -> printScore(true)
             53 -> printGoal()
             55 -> listPlayers()
+            56 -> listPlaces()
             else -> myPrintf("Command not implemented yet.\n")
         }
     }
@@ -1901,6 +1904,15 @@ class GengameKotlin : BaseKotlinGame() {
                 myPrintf("- %s (you, %s) - Location: %s - Score: %d\n", p.handle, status, roomName, p.myPoints)
             } else {
                 myPrintf("- %s (%s)\n", p.handle, status)
+            }
+        }
+    }
+
+    private fun listPlaces() {
+        myPrintf("Available locations:\n")
+        places.values.sortedBy { it.num }.forEach { p ->
+            if (p.name.isNotBlank()) {
+                myPrintf("- %s\n", p.name)
             }
         }
     }
