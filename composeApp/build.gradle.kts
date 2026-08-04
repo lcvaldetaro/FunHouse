@@ -211,7 +211,28 @@ val desktopPackageVersion = "$desktopMajor.$desktopMinor.$desktopBuildNum"
 compose.desktop {
     application {
         mainClass = "MainKt"
-        javaHome = System.getenv("JAVA_HOME") ?: System.getProperty("java.home")
+        javaHome = run {
+            val envJavaHome = System.getenv("JAVA_HOME")
+            if (!envJavaHome.isNullOrEmpty() && File(envJavaHome, "bin/jpackage").exists()) {
+                return@run envJavaHome
+            }
+            val currentJavaHome = System.getProperty("java.home")
+            if (File(currentJavaHome, "bin/jpackage").exists()) {
+                return@run currentJavaHome
+            }
+            try {
+                val process = ProcessBuilder("/usr/libexec/java_home").start()
+                val path = process.inputStream.bufferedReader().use { it.readText().trim() }
+                if (path.isNotEmpty() && File(path, "bin/jpackage").exists()) {
+                    return@run path
+                }
+            } catch (e: Exception) {}
+            val brewJavaHome = "/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home"
+            if (File(brewJavaHome, "bin/jpackage").exists()) {
+                return@run brewJavaHome
+            }
+            currentJavaHome
+        }
 
         nativeDistributions {
             targetFormats(
