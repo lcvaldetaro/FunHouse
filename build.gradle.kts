@@ -7,3 +7,10 @@ plugins {
     id("org.jetbrains.kotlin.multiplatform") version "2.4.10" apply false
     id("org.jetbrains.compose") version "1.11.1" apply false
 }
+
+subprojects {
+    tasks.matching { it.name == "compileCommonMainKotlinMetadata" }.all {
+        enabled = false
+    }
+}
+
