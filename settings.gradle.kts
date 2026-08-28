@@ -23,7 +23,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FunHouseMultiplatform"
+rootProject.name = "FunHouse"
 include(":composeApp")
 include(":shared:common")
 include(":feature:blackjack")
