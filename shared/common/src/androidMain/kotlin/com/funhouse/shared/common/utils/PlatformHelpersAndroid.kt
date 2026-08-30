@@ -21,7 +21,7 @@ actual fun readAssetFile(fileName: String): String? {
                 assetManager.open("files/$fileName")
             } catch (e2: Exception) {
                 try {
-                    assetManager.open("composeResources/funhousemultiplatform.shared.common.generated.resources/files/$fileName")
+                    assetManager.open("composeResources/funhouse.shared.common.generated.resources/files/$fileName")
                 } catch (e3: Exception) {
                     assetManager.open("composeResources/com.funhouse.shared.common.generated.resources/files/$fileName")
                 }
@@ -76,7 +76,7 @@ actual fun installFile(name: String, overwrite: Boolean) {
                 assetManager.open("files/$name")
             } catch (e2: Exception) {
                 try {
-                    assetManager.open("composeResources/funhousemultiplatform.shared.common.generated.resources/files/$name")
+                    assetManager.open("composeResources/funhouse.shared.common.generated.resources/files/$name")
                 } catch (e3: Exception) {
                     try {
                         assetManager.open("composeResources/com.funhouse.shared.common.generated.resources/files/$name")
