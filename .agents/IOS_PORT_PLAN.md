@@ -130,11 +130,15 @@ open -a Simulator
 
 ### 3.3 Building and Running FunHouse on the Simulator
 Once the iOS target and Xcode project are set up:
-1. **Compile iOS Simulator Framework via Gradle**:
+1. **Build iOS Simulator Framework via Gradle**:
    ```bash
    cd /Users/luizvaldetaro/valdetaro/FunHouse
-   ./gradlew :composeApp:compileKotlinIosSimulatorArm64
+   ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
    ```
+   > [!NOTE]
+   > For physical device testing, use `./gradlew :composeApp:linkDebugFrameworkIosArm64`.
+   > The output framework is located at: `composeApp/build/bin/iosSimulatorArm64/debugFramework/ComposeApp.framework`.
+
 2. **Build and Run via Terminal (`xcodebuild` + `simctl`)**:
    ```bash
    # Build the Xcode scheme targeting the booted simulator
@@ -145,7 +149,7 @@ Once the iOS target and Xcode project are set up:
               build
 
    # Install the built .app onto the booted simulator
-   xcrun simctl install booted iosApp/build/Release-iphonesimulator/iosApp.app
+   xcrun simctl install booted iosApp/build/Debug-iphonesimulator/iosApp.app
 
    # Launch the app
    xcrun simctl launch booted com.gepetto.gamescollection
@@ -1311,7 +1315,7 @@ Any agent picking up this plan can execute the phases sequentially using these e
 - [ ] 3.1: Add iOS framework target to `FunHouse/composeApp/build.gradle.kts`.
 - [ ] 3.2: Implement `composeApp/src/iosMain/kotlin/Main.kt` with safe Koin initialization and `File(gamePath)`.
 - [ ] 3.3: Generate `iosApp/` project (`iOSApp.swift`, `Info.plist`, `iosApp.xcodeproj`).
-- [ ] 3.4: Verify framework embed task: `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`.
+- [ ] 3.4: Build standalone debug framework: `./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64` (and verify Xcode embed task `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`).
 
 ### Phase 4: Simulator Launch & Gameplay Verification
 - [ ] 4.1: Boot simulator: `xcrun simctl boot "iPhone 17" && open -a Simulator`.

@@ -3,7 +3,8 @@
 > **Parent Plan**: [IOS_PORT_PLAN.md](file:///Users/luizvaldetaro/valdetaro/FunHouse/.agents/IOS_PORT_PLAN.md)  
 > **Scope**: Phase 0 only — Add iOS targets to all 4 `gepetto-utils` libraries and publish to `mavenLocal()`  
 > **Project Path**: `/Users/luizvaldetaro/valdetaro/gepetto-utils`  
-> **Build Order**: `circum` → `gepetto-utils` → `gclog` → `ads-lib` (strict topological)
+> **Build Order**: `circum` → `gepetto-utils` → `gclog` → `ads-lib` (strict topological)  
+> **Published Versions**: `circum:2.1.1`, `gepetto-utils:2.1.1`, `gclog:0.1.1`, `gcadslib:0.4.1`
 
 > [!IMPORTANT]
 > **Kotlin 2.4.20 uses the default hierarchy template.** When you declare `iosX64()`, `iosArm64()`, and `iosSimulatorArm64()`, the shared `iosMain` source set is **automatically created**. Place iOS actual files under `src/iosMain/kotlin/`. Reference `iosMain` in `sourceSets` with `val iosMain by getting { ... }`.
@@ -20,22 +21,37 @@ java -version          # Must be JDK 21
 ./gradlew --version    # Must be Gradle 9.7.1
 ```
 
+Confirm that the target version names in `gradle.properties` match the published target versions:
+- `circum/gradle.properties`: `VERSION_NAME=2.1.1`
+- `gepetto-utils/gradle.properties`: `VERSION_NAME=2.1.1`
+- `gclog/gradle.properties`: `VERSION_NAME=0.1.1`
+- `ads-lib/gradle.properties`: `VERSION_NAME=0.4.1`
+
 ---
 
-## Step 0.0: Add `ktor-client-darwin` to `libs.versions.toml`
+## Step 0.0: Update `libs.versions.toml` in `gepetto-utils`
 
 > [!IMPORTANT]
-> This goes into **gepetto-utils's** toml, not FunHouse's.
+> This modifies **gepetto-utils's** toml (`/Users/luizvaldetaro/valdetaro/gepetto-utils/gradle/libs.versions.toml`), not FunHouse's.
 
 #### [MODIFY] [libs.versions.toml](file:///Users/luizvaldetaro/valdetaro/gepetto-utils/gradle/libs.versions.toml)
 
-Add this line in the `[libraries]` section, near the other ktor entries:
+1. **Add `ktor-client-darwin`** in the `[libraries]` section, near the other ktor entries:
 
 ```toml
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktorClientCore" }
 ```
 
 This uses the existing `ktorClientCore = "3.6.0"` version reference.
+
+2. **Align version declarations** in the `[versions]` section with `gradle.properties`:
+
+```toml
+gepettoUtilsVersion = "2.1.1"
+circumVersion = "2.1.1"
+gepettoAdsLib = "0.4.1"
+gcLogVersion = "0.1.1"
+```
 
 ---
 
@@ -54,11 +70,11 @@ Add iOS targets after the `wasmJs` block (after line 36):
     iosSimulatorArm64()
 ```
 
-No additional source set dependencies or `iosMain` block needed — circum's iOS actual only uses `platform.Foundation.*` and existing commonMain dependencies (Compose runtime, Koin, Coroutines), all of which support iOS.
+No additional source set dependencies or `iosMain` block needed — circum's iOS actual only uses `platform.Foundation.*` and existing `commonMain` dependencies (Compose runtime, Koin, Coroutines, Lifecycle ViewModel), all of which support iOS.
 
 ### 0.1.2 — Create iOS Actual
 
-#### [NEW] `circum/src/iosMain/kotlin/club/gepetto/circum/CircumIos.kt`
+#### [NEW] `circum/src/iosMain/kotlin/club/gepetto/circum/CircumIntentProcessorFunctions.ios.kt`
 
 ```kotlin
 package club.gepetto.circum
@@ -87,7 +103,7 @@ actual inline fun <reified CIP : CircumViewModel> circumIntentProcessor(
 
 ```bash
 cd /Users/luizvaldetaro/valdetaro/gepetto-utils
-./gradlew :circum:compileKotlinIosSimulatorArm64
+./gradlew :circum:compileKotlinIosSimulatorArm64 :circum:compileKotlinIosArm64
 ```
 
 ---
@@ -109,7 +125,7 @@ Add iOS targets after the `wasmJs` block (after the `wasmJs { browser() }` closi
     iosSimulatorArm64()
 ```
 
-Add iosMain source set dependencies inside the `sourceSets { }` block (after `desktopMain`):
+Add `iosMain` source set dependencies inside the `sourceSets { }` block (after `desktopMain`):
 
 ```kotlin
         val iosMain by getting {
@@ -138,16 +154,21 @@ import platform.Foundation.*
 actual class PlatformFile {
     val path: String
 
-    actual constructor(pathname: String) { this.path = pathname }
-    actual constructor(parent: String, child: String) { this.path = "$parent/$child" }
+    actual constructor(pathname: String) { 
+        this.path = pathname 
+    }
+    actual constructor(parent: String, child: String) { 
+        this.path = if (parent.isEmpty()) child else if (parent.endsWith("/")) "$parent$child" else "$parent/$child" 
+    }
     actual constructor(parent: PlatformFile?, child: String) {
-        this.path = if (parent != null) "${parent.path}/$child" else child
+        this.path = if (parent == null) child else if (parent.path.endsWith("/")) "${parent.path}$child" else "${parent.path}/$child"
     }
 
     actual val parentFile: PlatformFile?
         get() {
-            val idx = path.lastIndexOf('/')
-            return if (idx > 0) PlatformFile(path.substring(0, idx)) else null
+            val trimmed = path.trimEnd('/')
+            val idx = trimmed.lastIndexOf('/')
+            return if (idx > 0) PlatformFile(trimmed.substring(0, idx)) else null
         }
     actual val absolutePath: String get() = path
 
@@ -165,6 +186,10 @@ actual class PlatformFile {
 
     @OptIn(ExperimentalForeignApi::class)
     actual fun writeBytes(bytes: ByteArray) {
+        if (bytes.isEmpty()) {
+            NSData().writeToFile(path, atomically = true)
+            return
+        }
         bytes.usePinned { pinned ->
             val nsData = NSData.create(
                 bytes = pinned.addressOf(0),
@@ -203,7 +228,7 @@ actual class PlatformFile {
 ```
 
 > [!NOTE]
-> `writeBytes` uses `NSData.create(bytes:length:)` instead of the string-roundtrip in the original plan, preventing binary data corruption.
+> `writeBytes` guards against empty byte arrays before calling `pinned.addressOf(0)`, preventing `IndexOutOfBoundsException`. Path constructors normalize trailing slashes to prevent malformed double slashes.
 
 ---
 
@@ -403,9 +428,6 @@ actual fun gCnewImageLoader(context: Any?): ImageLoader {
 }
 ```
 
-> [!NOTE]
-> `GcFullImagePopup` delegates to `GcFullImageCarousel` (defined in commonMain), matching the desktop and wasmJs pattern. `gCnewImageLoader` uses Coil3's `PlatformContext.INSTANCE` which supports iOS.
-
 ---
 
 #### [NEW] File 8: `club/gepetto/composeutils/webpage/WebComposeUtils.ios.kt`
@@ -444,8 +466,11 @@ package club.gepetto.utils
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
-actual val ioDispatcher: CoroutineDispatcher = Dispatchers.Default
+actual val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ```
+
+> [!NOTE]
+> `Dispatchers.IO` is available for Kotlin/Native iOS in `kotlinx-coroutines 1.11.0`.
 
 ---
 
@@ -457,7 +482,7 @@ package club.gepetto.utils
 import platform.AVFAudio.AVSpeechSynthesizer
 import platform.AVFAudio.AVSpeechUtterance
 
-private val synthesizer = AVSpeechSynthesizer()
+private val synthesizer by lazy { AVSpeechSynthesizer() }
 
 actual fun gCSpeak(text: String) {
     if (text.isBlank()) return
@@ -466,6 +491,9 @@ actual fun gCSpeak(text: String) {
 
 actual fun isRunningOnChromebook(context: Any): Boolean = false
 ```
+
+> [!NOTE]
+> `synthesizer` is lazily initialized to prevent initializing the AVFAudio audio engine subsystem before the iOS application runloop is active.
 
 ---
 
@@ -484,27 +512,24 @@ actual object GcAppInfo {
 }
 ```
 
-> [!IMPORTANT]
-> All **6** expect fields are present. Unlike the desktop actual (which adds extra non-expect fields `filesDir` and `appDirectoryFile`), the iOS actual only needs the expect-mandated fields.
-
 ---
 
 ### 0.2.3 — Check for `java/io/File.kt` shim need
 
-The wasmJs source set includes a `java/io/File.kt` shim. Before compiling, check if any `gepetto-utils` commonMain code references `java.io.*` directly:
+The wasmJs source set includes a `java/io/File.kt` shim. Verify that `gepetto-utils` `commonMain` code does not reference `java.io.*`:
 
 ```bash
 cd /Users/luizvaldetaro/valdetaro/gepetto-utils
 grep -r "import java\." gepetto-utils/src/commonMain/kotlin/ || echo "No java imports found"
 ```
 
-If java.io references exist, copy the wasmJs shim pattern to `gepetto-utils/src/iosMain/kotlin/java/io/File.kt`.
+If any `java.io` references exist, copy the wasmJs shim pattern to `gepetto-utils/src/iosMain/kotlin/java/io/File.kt`.
 
 ### 0.2.4 — Verify
 
 ```bash
 cd /Users/luizvaldetaro/valdetaro/gepetto-utils
-./gradlew :gepetto-utils:compileKotlinIosSimulatorArm64
+./gradlew :gepetto-utils:compileKotlinIosSimulatorArm64 :gepetto-utils:compileKotlinIosArm64
 ```
 
 ---
@@ -528,36 +553,55 @@ No additional source set dependencies needed.
 
 ### 0.3.2 — Create iOS Actual
 
-#### [NEW] `gclog/src/iosMain/kotlin/club/gepetto/PlatformIos.kt`
+#### [NEW] `gclog/src/iosMain/kotlin/club/gepetto/GcLog.kt`
 
 > [!CAUTION]
-> Package **must** be `club.gepetto` — not `club.gepetto.gclog`. The expects in [GcLog.kt](file:///Users/luizvaldetaro/valdetaro/gepetto-utils/gclog/src/commonMain/kotlin/club/gepetto/GcLog.kt) are declared in `package club.gepetto`.
+> Package **must** be `club.gepetto` — not `club.gepetto.gclog`. The expects in [GcLog.kt](file:///Users/luizvaldetaro/valdetaro/gepetto-utils/gclog/src/commonMain/kotlin/club/gepetto/GcLog.kt) are declared in `package club.gepetto`. The file is named `GcLog.kt` to match `androidMain`, `desktopMain`, and `wasmJsMain`.
 
 ```kotlin
 package club.gepetto
 
 import platform.Foundation.NSLog
 
-internal actual fun formatString(pattern: String, args: Array<out Any?>): String =
-    args.fold(pattern) { acc, arg -> acc.replaceFirst("%s", arg.toString()) }
+internal actual fun formatString(pattern: String, args: Array<out Any?>): String {
+    var result = pattern
+    for (arg in args) {
+        val specifierRegex = "%[\\d\\.]*[a-zA-Z]".toRegex()
+        val match = specifierRegex.find(result)
+        if (match != null) {
+            result = result.replaceFirst(match.value, arg.toString())
+        } else {
+            break
+        }
+    }
+    return result
+}
 
-internal actual fun getStackTag(): String? = null
+internal actual fun getStackTag(): String? = "GcLogIos"
 
 internal actual fun platformLog(priority: Int, tag: String?, message: String, t: Throwable?) {
     val level = when (priority) {
-        2 -> "V"; 3 -> "D"; 4 -> "I"; 5 -> "W"; 6 -> "E"; else -> "LOG"
+        2 -> "VERBOSE"
+        3 -> "DEBUG"
+        4 -> "INFO"
+        5 -> "WARN"
+        6 -> "ERROR"
+        else -> "DEBUG"
     }
     val logTag = tag ?: "GcLog"
-    NSLog("[$level/$logTag] $message")
-    t?.let { NSLog("  Exception: ${it.message}") }
+    val fullMessage = if (t != null) "[$level/$logTag] $message\n${t.message}" else "[$level/$logTag] $message"
+    NSLog("%s", fullMessage)
 }
 ```
+
+> [!NOTE]
+> `formatString` uses regex specifier replacement matching `wasmJsMain`, supporting `%d`, `%f`, `%s`, etc. `NSLog("%s", ...)` is format-string safe against messages containing `%`.
 
 ### 0.3.3 — Verify
 
 ```bash
 cd /Users/luizvaldetaro/valdetaro/gepetto-utils
-./gradlew :gclog:compileKotlinIosSimulatorArm64
+./gradlew :gclog:compileKotlinIosSimulatorArm64 :gclog:compileKotlinIosArm64
 ```
 
 ---
@@ -591,6 +635,7 @@ Implements: `Bundle`, `initMobileAds`, `initAnalytics`, `initAnalyticsAndAds`, `
 package club.gepetto.gcadslib
 
 import club.gepetto.composeutils.Context
+import platform.Foundation.NSUserDefaults
 
 actual class Bundle actual constructor() {
     private val map = mutableMapOf<String, Any>()
@@ -605,7 +650,17 @@ actual class Bundle actual constructor() {
 actual fun initMobileAds(context: Context) {}
 actual fun initAnalytics(context: Context, tag: String?) {}
 actual fun initAnalyticsAndAds(context: Context, tag: String?) {}
-actual fun checkFirstRun(context: Context): Boolean = false
+
+actual fun checkFirstRun(context: Context): Boolean {
+    val defaults = NSUserDefaults.standardUserDefaults
+    val hasRun = defaults.boolForKey("gcadslib_has_run_before")
+    if (!hasRun) {
+        defaults.setBool(true, forKey = "gcadslib_has_run_before")
+        defaults.synchronize()
+        return true
+    }
+    return false
+}
 
 actual object AnalyticsTracker {
     actual val measurementId: String get() = ""
@@ -624,6 +679,9 @@ actual object AnalyticsTracker {
     actual fun logNewUser(context: Context, tag: String?) {}
 }
 ```
+
+> [!NOTE]
+> `checkFirstRun` uses `NSUserDefaults.standardUserDefaults` so that first-launch detection works properly across launches on iOS.
 
 ---
 
@@ -774,7 +832,7 @@ actual object AdInterstitial {
 
 ```bash
 cd /Users/luizvaldetaro/valdetaro/gepetto-utils
-./gradlew :ads-lib:compileKotlinIosSimulatorArm64
+./gradlew :ads-lib:compileKotlinIosSimulatorArm64 :ads-lib:compileKotlinIosArm64
 ```
 
 ---
@@ -787,12 +845,27 @@ cd /Users/luizvaldetaro/valdetaro/gepetto-utils
 ```
 
 > [!IMPORTANT]
-> This publishes **all 4 libraries** with their new iOS artifacts. Verify that the iOS metadata/klib files appear:
+> This publishes **all 4 libraries** with their new iOS artifacts at their respective version numbers:
+> - `circum`: **2.1.1**
+> - `gepetto-utils`: **2.1.1**
+> - `gclog`: **0.1.1**
+> - `gcadslib`: **0.4.1**
+>
+> Verify that the iOS target metadata/klib directories appear under `~/.m2/repository/club/gepetto/`:
 > ```bash
-> ls ~/.m2/repository/club/gepetto/circum/*/  | grep ios
-> ls ~/.m2/repository/club/gepetto/gepetto-utils/*/  | grep ios
-> ls ~/.m2/repository/club/gepetto/gclog/*/  | grep ios
-> ls ~/.m2/repository/club/gepetto/gcadslib/*/  | grep ios
+> ls ~/.m2/repository/club/gepetto/circum-iossimulatorarm64/2.1.1/
+> ls ~/.m2/repository/club/gepetto/gepetto-utils-iossimulatorarm64/2.1.1/
+> ls ~/.m2/repository/club/gepetto/gclog-iossimulatorarm64/0.1.1/
+> ls ~/.m2/repository/club/gepetto/gcadslib-iossimulatorarm64/0.4.1/
+> ```
+>
+> **Phase 1 Handoff Requirement**:  
+> In Phase 1, `FunHouse/gradle/libs.versions.toml` must be updated to consume these newly published versions:
+> ```toml
+> gepettoUtilsVersion = "2.1.1"
+> circumVersion = "2.1.1"
+> gepettoAdsLib = "0.4.1"
+> gcLogVersion = "0.1.1"
 > ```
 
 ---
@@ -802,14 +875,81 @@ cd /Users/luizvaldetaro/valdetaro/gepetto-utils
 > [!WARNING]
 > Per coding rule #9 in [AGENTS.md](file:///Users/luizvaldetaro/valdetaro/.agents/AGENTS.md): *"When making changes to the Library, build all targets for the Lap Counter, Toy Collection, FunHouse and Scanner."*
 
-After publishing, verify that existing Android, Desktop, and WasmJs targets still compile:
+After publishing, verify that all existing Android, Desktop, WasmJs, and the new iOS targets compile cleanly across all 4 modules:
 
 ```bash
 cd /Users/luizvaldetaro/valdetaro/gepetto-utils
-./gradlew compileKotlinAndroid compileKotlinDesktop compileKotlinWasmJs
+./gradlew compileDebugKotlinAndroid compileKotlinDesktop compileKotlinWasmJs
+./gradlew compileKotlinIosSimulatorArm64 compileKotlinIosArm64
 ```
 
 If all pass, Phase 0 is complete.
+
+---
+
+## Step 0.7: Actual Commands Used to Build the iOS Version
+
+### A. Building `gepetto-utils` iOS Libraries (Phase 0)
+
+To compile and build the iOS target artifacts across all 4 library modules:
+
+```bash
+cd /Users/luizvaldetaro/valdetaro/gepetto-utils
+
+# 1. Compile iOS targets for all libraries (Simulator Arm64, Device Arm64, Intel Simulator x64)
+./gradlew compileKotlinIosSimulatorArm64 compileKotlinIosArm64 compileKotlinIosX64
+
+# 2. Build and publish all KMP targets and iOS klibs to mavenLocal (~/.m2/repository)
+./gradlew publishToMavenLocal
+```
+
+For individual module iOS builds:
+```bash
+# Circum
+./gradlew :circum:compileKotlinIosSimulatorArm64 :circum:compileKotlinIosArm64 :circum:compileKotlinIosX64
+
+# Gepetto Utils
+./gradlew :gepetto-utils:compileKotlinIosSimulatorArm64 :gepetto-utils:compileKotlinIosArm64 :gepetto-utils:compileKotlinIosX64
+
+# GcLog
+./gradlew :gclog:compileKotlinIosSimulatorArm64 :gclog:compileKotlinIosArm64 :gclog:compileKotlinIosX64
+
+# Ads-Lib
+./gradlew :ads-lib:compileKotlinIosSimulatorArm64 :ads-lib:compileKotlinIosArm64 :ads-lib:compileKotlinIosX64
+```
+
+### B. Building FunHouse iOS Application (Downstream Phases)
+
+Once Phase 0 is published and consumed by FunHouse, the actual commands to build the iOS app are:
+
+1. **Build the Standalone Compose Framework via Gradle**:
+   ```bash
+   cd /Users/luizvaldetaro/valdetaro/FunHouse
+
+   # Build Debug Framework for Apple Silicon iOS Simulator
+   ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+
+   # Build Debug Framework for Physical iPhone / iPad (Device)
+   ./gradlew :composeApp:linkDebugFrameworkIosArm64
+   ```
+   > Output framework is generated at:  
+   > `composeApp/build/bin/iosSimulatorArm64/debugFramework/ComposeApp.framework`
+
+2. **Build and Run the Complete iOS App Bundle (`.app`) via Xcode Command Line**:
+   ```bash
+   cd /Users/luizvaldetaro/valdetaro/FunHouse
+
+   # Build Xcode project scheme targeting simulator
+   xcodebuild -project iosApp/iosApp.xcodeproj \
+              -scheme iosApp \
+              -destination 'platform=iOS Simulator,name=iPhone 17' \
+              -configuration Debug \
+              build
+
+   # Install and launch on booted simulator
+   xcrun simctl install booted iosApp/build/Debug-iphonesimulator/iosApp.app
+   xcrun simctl launch booted com.gepetto.gamescollection
+   ```
 
 ---
 
@@ -819,7 +959,7 @@ If all pass, Phase 0 is complete.
 |---|---|---|---|
 | 0.0 | gepetto-utils (root) | MODIFY | `gradle/libs.versions.toml` |
 | 0.1.1 | circum | MODIFY | `circum/build.gradle.kts` |
-| 0.1.2 | circum | NEW | `circum/src/iosMain/kotlin/club/gepetto/circum/CircumIos.kt` |
+| 0.1.2 | circum | NEW | `circum/src/iosMain/kotlin/club/gepetto/circum/CircumIntentProcessorFunctions.ios.kt` |
 | 0.2.1 | gepetto-utils | MODIFY | `gepetto-utils/build.gradle.kts` |
 | 0.2.2 | gepetto-utils | NEW | `gepetto-utils/src/iosMain/kotlin/club/gepetto/composeutils/PlatformFile.ios.kt` |
 | 0.2.2 | gepetto-utils | NEW | `gepetto-utils/src/iosMain/kotlin/club/gepetto/composeutils/PlatformBitmap.ios.kt` |
@@ -833,7 +973,7 @@ If all pass, Phase 0 is complete.
 | 0.2.2 | gepetto-utils | NEW | `gepetto-utils/src/iosMain/kotlin/club/gepetto/utils/Utils.ios.kt` |
 | 0.2.2 | gepetto-utils | NEW | `gepetto-utils/src/iosMain/kotlin/club/gepetto/utils/GcAppInfo.ios.kt` |
 | 0.3.1 | gclog | MODIFY | `gclog/build.gradle.kts` |
-| 0.3.2 | gclog | NEW | `gclog/src/iosMain/kotlin/club/gepetto/PlatformIos.kt` |
+| 0.3.2 | gclog | NEW | `gclog/src/iosMain/kotlin/club/gepetto/GcLog.kt` |
 | 0.4.1 | ads-lib | MODIFY | `ads-lib/build.gradle.kts` |
 | 0.4.2 | ads-lib | NEW | `ads-lib/src/iosMain/kotlin/club/gepetto/gcadslib/Actuals.ios.kt` |
 | 0.4.2 | ads-lib | NEW | `ads-lib/src/iosMain/kotlin/club/gepetto/gcadslib/ui/ActualsUi.ios.kt` |
@@ -846,7 +986,9 @@ If all pass, Phase 0 is complete.
 
 | Risk | Description | Mitigation |
 |---|---|---|
-| Missing `java/io/File.kt` shim | If gepetto-utils commonMain references `java.io.File` directly (wasmJs has this shim), iOS compilation will fail | Run `grep -r "import java\." gepetto-utils/src/commonMain/` and copy wasmJs shim if needed |
-| Signature drift | If any expect signature changed since this plan was written, actuals won't match | Compiler errors will pinpoint exact mismatches — fix the actual signature |
+| Missing `java/io/File.kt` shim | If `gepetto-utils` commonMain references `java.io.File` directly (wasmJs has this shim), iOS compilation will fail | Run `grep -r "import java\." gepetto-utils/src/commonMain/` and copy wasmJs shim if needed (verified: no java imports currently exist in commonMain) |
+| Empty `ByteArray` crash in `writeBytes` | Calling `pinned.addressOf(0)` on empty byte array throws `IndexOutOfBoundsException` | Guard added in `PlatformFile.ios.kt` to write empty `NSData()` directly |
+| Version mismatch with FunHouse | Publishing 2.1.1/0.1.1/0.4.1 without updating FunHouse TOML will cause FunHouse to fail resolving iOS targets | Explicitly documented in Step 0.5 for Phase 1 handoff |
+| Invalid Gradle tasks | `compileKotlinAndroid` does not exist in AGP KMP | Corrected to `compileDebugKotlinAndroid` |
 | Coil3 iOS support | `PlatformContext.INSTANCE` in `gCnewImageLoader` requires Coil 3.x iOS support | Already using Coil 3.6.2 which supports iOS via Compose Multiplatform |
 | CMake native build | gepetto-utils has CMake/JNI code in `android {}` block | Only triggers for Android target — does not affect iOS |
