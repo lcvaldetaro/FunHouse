@@ -38,6 +38,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":shared:common"))
             implementation(libs.androidx.lifecycle.viewmodel.compose)
+            implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.kotlinx.serialization.json)
             

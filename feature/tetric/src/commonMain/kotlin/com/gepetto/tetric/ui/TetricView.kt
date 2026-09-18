@@ -1,22 +1,10 @@
 package com.gepetto.tetric.ui
 import com.funhouse.shared.common.utils.Preview
 import com.funhouse.shared.common.generated.resources.Res as CommonR
-import com.funhouse.shared.common.generated.resources.underconstruction
 import com.funhouse.shared.common.generated.resources.backarrow
 import com.funhouse.shared.common.generated.resources.ic_profile
 import com.funhouse.shared.common.generated.resources.call_spk_on
 import com.funhouse.shared.common.generated.resources.speaker_off
-import com.funhouse.shared.common.generated.resources.eliza
-import com.funhouse.shared.common.generated.resources.funhouse
-import com.funhouse.shared.common.generated.resources.steamboat_willie
-import com.funhouse.shared.common.generated.resources.android
-import com.funhouse.shared.common.generated.resources.numberseven
-import com.funhouse.shared.common.generated.resources.call_mute
-import com.funhouse.shared.common.generated.resources.pause
-
-
-
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -36,9 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import org.jetbrains.compose.resources.painterResource
-
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
