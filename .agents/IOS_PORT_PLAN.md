@@ -4,8 +4,8 @@
 > **Target Application**: FunHouse Game Collection (`/Users/luizvaldetaro/valdetaro/FunHouse`)  
 > **Workspace**: `/Users/luizvaldetaro/valdetaro`  
 > **Document Location**: `.agents/IOS_PORT_PLAN.md`  
-> **Last Updated**: 2026-09-18 (Rev 4 — Codebase synchronization with JDK 21 / Kotlin 2.4.20 / Compose 1.12.0, exact expect/actual signatures for gepetto-utils suite, missing java.io/Thread shims for iOS, crash fixes for Koin and AppData.gameFolderFile, automated Xcode project generation)  
-> **Current Phase**: Phase 0 (Environment Setup & Shared Library Prerequisites)
+> **Last Updated**: 2026-09-18 (Rev 5 — Phase 0 completed & verified: all 4 gepetto-utils shared libraries built for iosArm64 / iosSimulatorArm64 and published to mavenLocal(), advancing master plan to Phase 1)  
+> **Current Phase**: Phase 1 (Core Models & Shims in :shared:common)
 
 ---
 
@@ -281,367 +281,111 @@ Once enrolled:
 
 ## 6. Detailed Technical Specification by Module
 
-### 6.1 Step 0: Shared Libraries (`gepetto-utils`) KMP iOS Support
+#### 6.1 Step 0: Shared Libraries (`gepetto-utils`) KMP iOS Support [COMPLETED & PUBLISHED]
 Path: `/Users/luizvaldetaro/valdetaro/gepetto-utils`
 
-> [!IMPORTANT]
-> The four libraries must be built in this strict dependency order:
-> 1. `:circum`
-> 2. `:gepetto-utils`
-> 3. `:gclog`
-> 4. `:ads-lib`
-
-#### 6.1.1 `circum` Module
-Update `circum/build.gradle.kts`:
-```kotlin
-kotlin {
-    // Android, JVM desktop, WasmJs...
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-}
-```
-Create `circum/src/iosMain/kotlin/club/gepetto/circum/CircumIos.kt`:
-```kotlin
-package club.gepetto.circum
-
-import androidx.compose.runtime.Composable
-import org.koin.compose.koinInject
-import platform.Foundation.NSDate
-import platform.Foundation.timeIntervalSince1970
-
-actual fun circumCurrentTimeMillis(): Long =
-    (NSDate().timeIntervalSince1970 * 1000.0).toLong()
-
-@Composable
-actual inline fun <reified CIP : CircumViewModel> circumIntentProcessor(
-    initialState: Any?,
-    initialCommand: Any?,
-): CIP {
-    val cm = koinInject<CIP>()
-    if (initialCommand != null) (cm as CircumIntentProcessor<Any, Any, Any>).sendIntentCommand(initialCommand)
-    if (initialState != null) (cm as CircumIntentProcessor<Any, Any, Any>).setState(initialState)
-    return cm
-}
-```
-
-#### 6.1.2 `gepetto-utils` Module
-Update `gepetto-utils/build.gradle.kts`:
-```kotlin
-kotlin {
-    // Android, JVM desktop, WasmJs...
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-
-    sourceSets {
-        val iosMain by creating {
-            dependsOn(commonMain.get())
-            dependencies {
-                implementation(libs.ktor.client.darwin)
-            }
-        }
-    }
-}
-```
-Add `ktor-client-darwin` to `gradle/libs.versions.toml`:
-```toml
-[libraries]
-ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktorClientCore" }
-```
-
-Implement `gepetto-utils/src/iosMain/kotlin/`:
-1. `club/gepetto/composeutils/PlatformFile.ios.kt`:
-```kotlin
-package club.gepetto.composeutils
-
-import platform.Foundation.*
-
-actual class PlatformFile {
-    val path: String
-
-    actual constructor(pathname: String) { this.path = pathname }
-    actual constructor(parent: String, child: String) { this.path = "$parent/$child" }
-    actual constructor(parent: PlatformFile?, child: String) {
-        this.path = if (parent != null) "${parent.path}/$child" else child
-    }
-
-    actual val parentFile: PlatformFile?
-        get() {
-            val idx = path.lastIndexOf('/')
-            return if (idx > 0) PlatformFile(path.substring(0, idx)) else null
-        }
-    actual val absolutePath: String get() = path
-
-    actual fun exists(): Boolean = NSFileManager.defaultManager.fileExistsAtPath(path)
-
-    actual fun writeText(text: String) {
-        val nsStr = NSString.create(string = text)
-        nsStr.writeToFile(path, atomically = true, encoding = NSUTF8StringEncoding, error = null)
-    }
-
-    actual fun readText(): String {
-        val data = NSData.dataWithContentsOfFile(path) ?: return ""
-        return NSString.create(data = data, encoding = NSUTF8StringEncoding)?.toString() ?: ""
-    }
-
-    actual fun writeBytes(bytes: ByteArray) {
-        val nsStr = bytes.decodeToString()
-        writeText(nsStr)
-    }
-
-    actual fun mkdir(): Boolean =
-        NSFileManager.defaultManager.createDirectoryAtPath(path, withIntermediateDirectories = false, attributes = null, error = null)
-
-    actual fun mkdirs(): Boolean =
-        NSFileManager.defaultManager.createDirectoryAtPath(path, withIntermediateDirectories = true, attributes = null, error = null)
-
-    actual fun length(): Long {
-        val attrs = NSFileManager.defaultManager.attributesOfItemAtPath(path, error = null) ?: return 0L
-        return (attrs[NSFileSize] as? NSNumber)?.longValue ?: 0L
-    }
-
-    actual fun lastModified(): Long {
-        val attrs = NSFileManager.defaultManager.attributesOfItemAtPath(path, error = null) ?: return 0L
-        val date = attrs[NSFileModificationDate] as? NSDate ?: return 0L
-        return (date.timeIntervalSince1970 * 1000.0).toLong()
-    }
-
-    actual fun delete(): Boolean = NSFileManager.defaultManager.removeItemAtPath(path, error = null)
-}
-```
-
-2. `club/gepetto/composeutils/Actuals.ios.kt`:
-```kotlin
-package club.gepetto.composeutils
-
-import androidx.compose.foundation.layout.Box
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import platform.Foundation.NSDate
-import platform.Foundation.timeIntervalSince1970
-
-actual class PlatformBitmap(val imageBitmap: ImageBitmap)
-actual fun PlatformBitmap.toImageBitmap(): ImageBitmap = this.imageBitmap
-
-actual abstract class Context
-
-actual fun gcCurrentTimeMillis(): Long = (NSDate().timeIntervalSince1970 * 1000.0).toLong()
-
-@Composable
-actual fun QrCodeView(data: String, modifier: Modifier) { Box(modifier) }
-
-actual fun createFileImageFromAssets(ctx: Context, image: PlatformFile, resource: String) {}
-actual fun createFileImageFromDrawable(ctx: Context, imageFile: PlatformFile, resource: Int) {}
-actual fun createBitmapFromDrawable(ctx: Context, resource: Int): PlatformBitmap? = null
-
-@Composable
-actual fun CreateFileImageFromDrawable(imageFile: PlatformFile, resource: Int) {}
-
-actual fun invertBitmapColors(bitmap: PlatformBitmap): PlatformBitmap? = null
-
-@Composable
-actual fun GcCoil2Image(
-    url: String,
-    modifier: Modifier,
-    contentScale: ContentScale,
-    contentDescription: String?,
-    errorImage: Int,
-    fallbackImage: Int,
-    placeHolderImage: Int,
-    cache: Boolean,
-    onError: (Any) -> Unit,
-    onSuccess: () -> Unit
-) {
-    Box(modifier)
-}
-
-actual val isAndroidPlatform: Boolean = false
-
-@Composable
-actual fun BackHandler(enabled: Boolean, onBack: () -> Unit) {}
-
-actual fun textAsBitmap(text: String, textSize: Float, textColor: Int): PlatformBitmap {
-    return PlatformBitmap(androidx.compose.ui.graphics.ImageBitmap(1, 1))
-}
-```
-
-3. `club/gepetto/composeutils/PlatformHttpClient.ios.kt`:
-```kotlin
-package club.gepetto.composeutils
-
-import io.ktor.client.HttpClient
-import io.ktor.client.HttpClientConfig
-import io.ktor.client.engine.darwin.Darwin
-
-actual fun createPlatformHttpClient(block: HttpClientConfig<*>.() -> Unit): HttpClient {
-    return HttpClient(Darwin) {
-        block()
-    }
-}
-```
-
-4. `club/gepetto/composeutils/webpage/WebComposeUtils.ios.kt`:
-```kotlin
-package club.gepetto.composeutils.webpage
-
-import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-
-@Composable actual fun GcHtmlView(htmlData: String, modifier: Modifier) { Box(modifier) { Text(htmlData) } }
-@Composable actual fun GcHtmlText(htmlText: String, modifier: Modifier) { Box(modifier) { Text(htmlText) } }
-@Composable actual fun GcHtmlFile(htmlFolder: String, htmlFilename: String, modifier: Modifier) { Box(modifier) }
-```
-
-5. `club/gepetto/utils/Utils.ios.kt`:
-```kotlin
-package club.gepetto.utils
-
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import platform.AVFAudio.AVSpeechSynthesizer
-import platform.AVFAudio.AVSpeechUtterance
-
-actual val ioDispatcher: CoroutineDispatcher = Dispatchers.Default
-
-private val synthesizer = AVSpeechSynthesizer()
-actual fun gCSpeak(text: String) {
-    if (text.isBlank()) return
-    synthesizer.speakUtterance(AVSpeechUtterance(string = text))
-}
-
-actual fun isRunningOnChromebook(context: Any): Boolean = false
-
-actual object GcAppInfo {
-    actual var application_Context: Any? = null
-    actual var versionCode: Long? = 1L
-    actual var versionName: String? = "1.0"
-    actual var ttsHandle: Any? = null
-    actual var appPackageFolder: String = ""
-    actual var releaseVersion: Boolean = false
-}
-```
-
-#### 6.1.3 `gclog` Module
-Update `gclog/build.gradle.kts` with iOS targets.
-Create `gclog/src/iosMain/kotlin/club/gepetto/PlatformIos.kt`:
-> [!IMPORTANT]
-> The package MUST be `club.gepetto` (matching `GcLog.kt` in `commonMain`), NOT `club.gepetto.gclog`.
-
-```kotlin
-package club.gepetto
-
-import platform.Foundation.NSLog
-
-internal actual fun formatString(pattern: String, args: Array<out Any?>): String =
-    args.fold(pattern) { acc, arg -> acc.replaceFirst("%s", arg.toString()) }
-
-internal actual fun getStackTag(): String? = null
-
-internal actual fun platformLog(priority: Int, tag: String?, message: String, t: Throwable?) {
-    val level = when (priority) {
-        2 -> "V"; 3 -> "D"; 4 -> "I"; 5 -> "W"; 6 -> "E" else -> "LOG"
-    }
-    val logTag = tag ?: "GcLog"
-    NSLog("[$level/$logTag] $message")
-    t?.let { NSLog("  Exception: ${it.message}") }
-}
-```
-
-#### 6.1.4 `ads-lib` Module
-Update `ads-lib/build.gradle.kts` with iOS targets.
-
-1. `ads-lib/src/iosMain/kotlin/club/gepetto/gcadslib/Actuals.ios.kt`:
-```kotlin
-package club.gepetto.gcadslib
-
-import club.gepetto.composeutils.Context
-
-actual class Bundle actual constructor() {
-    private val map = mutableMapOf<String, Any>()
-    actual fun putInt(key: String?, value: Int) { key?.let { map[it] = value } }
-    actual fun putString(key: String?, value: String?) { if (key != null && value != null) map[key] = value }
-    actual fun putLong(key: String?, value: Long) { key?.let { map[it] = value } }
-    actual fun putBoolean(key: String?, value: Boolean) { key?.let { map[it] = value } }
-}
-
-actual fun initMobileAds(context: Context) {}
-actual fun initAnalytics(context: Context, tag: String?) {}
-actual fun initAnalyticsAndAds(context: Context, tag: String?) {}
-actual fun checkFirstRun(context: Context): Boolean = false
-
-actual object AnalyticsTracker {
-    actual val measurementId: String get() = ""
-    actual fun init(context: Context) {}
-    actual fun trackAnalyticsToggle(enabled: Boolean, serverVersion: String) {}
-    actual fun trackRaceStart(
-        numberOfLanes: Int, driverCount: Int, isDemo: Boolean,
-        heatRotationType: String, heatScoringMethod: String,
-        overallScoringMethod: String, fuelSystem: String,
-        hardwareInterface: String, serverVersion: String
-    ) {}
-    actual fun logEvent(screenView: String, bundle: Bundle) {}
-    actual fun logEvent(tag: String, key: String, value: Int) {}
-    actual fun logEvent(tag: String) {}
-    actual fun logScreenView(screenView: String) {}
-    actual fun logNewUser(context: Context, tag: String?) {}
-}
-```
-
-2. `ads-lib/src/iosMain/kotlin/club/gepetto/gcadslib/ui/ActualsUi.ios.kt`:
-```kotlin
-package club.gepetto.gcadslib.ui
-
-import androidx.compose.foundation.layout.Box
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
-import club.gepetto.composeutils.Context
-
-actual abstract class NativeAd
-
-@Composable actual fun NativeAdViewComposeQuarterScreen(nativeAd: NativeAd, modifier: Modifier, title: String, darkMode: Boolean?, refreshTimer: Int) { Box(modifier) }
-@Composable actual fun NativeAdViewComposeEightScreen(nativeAd: NativeAd, modifier: Modifier, title: String, darkMode: Boolean?, refreshTimer: Int) { Box(modifier) }
-@Composable actual fun NativeAdViewComposeHalfScreen(nativeAd: NativeAd, modifier: Modifier, rightPane: Boolean, title: String, darkMode: Boolean?, refreshTimer: Int) { Box(modifier) }
-@Composable actual fun NativeAdViewComposeBanner(nativeAd: NativeAd, modifier: Modifier, title: String, darkMode: Boolean?, refreshTimer: Int) { Box(modifier) }
-@Composable actual fun NativeAdViewComposeLargeBanner(nativeAd: NativeAd, modifier: Modifier, title: String, darkMode: Boolean?, refreshTimer: Int) { Box(modifier) }
-@Composable actual fun NativeAdViewComposeFullBanner(nativeAd: NativeAd, modifier: Modifier, title: String, darkMode: Boolean?, refreshTimer: Int) { Box(modifier) }
-@Composable actual fun NativeAdViewComposeLeaderboard(nativeAd: NativeAd, modifier: Modifier, title: String, darkMode: Boolean?, refreshTimer: Int) { Box(modifier) }
-@Composable actual fun NativeAdViewComposeMediumRectangle(nativeAd: NativeAd, modifier: Modifier, title: String, darkMode: Boolean?, refreshTimer: Int) { Box(modifier) }
-
-@Composable actual fun AdNative(modifier: Modifier, adUnit: String, rightPane: Boolean, title: String, darkMode: Boolean?, refreshTimer: Int, adImpressionTag: String, adUnitTag: String, adErrorTag: String, onAdLoaded: () -> Unit, onAdImpression: () -> Unit, onAdClicked: () -> Unit, onError: () -> Unit) { Box(modifier) }
-@Composable actual fun AdNativeBanner(modifier: Modifier, adUnit: String, title: String, darkMode: Boolean?, refreshTimer: Int, adImpressionTag: String, adUnitTag: String, adErrorTag: String, onAdLoaded: () -> Unit, onAdImpression: () -> Unit, onAdClicked: () -> Unit, onError: () -> Unit) { Box(modifier) }
-@Composable actual fun AdNativeLargeBanner(modifier: Modifier, adUnit: String, title: String, darkMode: Boolean?, refreshTimer: Int, adImpressionTag: String, adUnitTag: String, adErrorTag: String, onAdLoaded: () -> Unit, onAdImpression: () -> Unit, onAdClicked: () -> Unit, onError: () -> Unit) { Box(modifier) }
-@Composable actual fun AdNativeFullBanner(modifier: Modifier, adUnit: String, title: String, darkMode: Boolean?, refreshTimer: Int, adImpressionTag: String, adUnitTag: String, adErrorTag: String, onAdLoaded: () -> Unit, onAdImpression: () -> Unit, onAdClicked: () -> Unit, onError: () -> Unit) { Box(modifier) }
-@Composable actual fun AdNativeLeaderboard(modifier: Modifier, adUnit: String, title: String, darkMode: Boolean?, refreshTimer: Int, adImpressionTag: String, adUnitTag: String, adErrorTag: String, onAdLoaded: () -> Unit, onAdImpression: () -> Unit, onAdClicked: () -> Unit, onError: () -> Unit) { Box(modifier) }
-@Composable actual fun AdNativeMediumRectangle(modifier: Modifier, adUnit: String, title: String, darkMode: Boolean?, refreshTimer: Int, adImpressionTag: String, adUnitTag: String, adErrorTag: String, onAdLoaded: () -> Unit, onAdImpression: () -> Unit, onAdClicked: () -> Unit, onError: () -> Unit) { Box(modifier) }
-
-@Composable actual fun AdBanner(modifier: Modifier, adUnit: String, adSize: AdBannerSize, adImpressionTag: String, adErrorTag: String, adClickTag: String, adSizeTag: String, adWidthDp: Dp?, onAdLoaded: () -> Unit, onAdImpression: () -> Unit, onAdClicked: () -> Unit, onError: () -> Unit) { Box(modifier) }
-@Composable actual fun AdBannerAdaptive(adUnitId: String, modifier: Modifier, adWidthDp: Dp?) { Box(modifier) }
-@Composable actual fun AdBannerCard(modifier: Modifier, adSize: AdBannerSize) { Box(modifier) }
-@Composable actual fun AdBannerBox(modifier: Modifier, adSize: AdBannerSize) { Box(modifier) }
-
-@Composable actual fun GcAd(modifier: Modifier, rightPane: Boolean, adSize: AdBannerSize, title: String, darkMode: Boolean?, refreshTimer: Int, usingNativeAd: Boolean, adImpressionTag: String, adErrorTag: String, adClickTag: String, adSizeTag: String, adUnitTag: String, adUnitId: String, adWidthDp: Dp?, onAdLoaded: () -> Unit, onAdImpression: () -> Unit, onAdClicked: () -> Unit, onError: () -> Unit) { Box(modifier) }
-
-actual object AdInterstitial {
-    actual fun load(context: Context) {}
-    actual fun show(context: Context, onAdDismissed: () -> Unit) { onAdDismissed() }
-    actual fun isReady(): Boolean = false
-    actual fun isLoading(): Boolean = false
-}
-
-@Composable actual fun InterstitialAd(content: @Composable () -> Unit) { content() }
-```
-
-#### 6.1.5 Publishing to `mavenLocal()`
-```bash
-cd /Users/luizvaldetaro/valdetaro/gepetto-utils
-./gradlew publishToMavenLocal
-```
+> [!NOTE]
+> **Phase 0 Status: COMPLETE & PUBLISHED TO MAVENLOCAL (2026-09-18)**  
+> All 4 shared libraries in `gepetto-utils` have been updated with modern Apple iOS targets (`iosArm64`, `iosSimulatorArm64`), all 15 native iOS actual files implemented, all compilation targets verified cleanly, and published to `~/.m2/repository/club/gepetto/`.
+> 
+> **Published Version Coordinates**:
+> - `club.gepetto:circum:2.1.1`
+> - `club.gepetto:gepetto-utils:2.1.1`
+> - `club.gepetto:gclog:0.1.1`
+> - `club.gepetto:gcadslib:0.4.1`
+
+#### Target Architecture Decision: Modern Apple Silicon
+Compose Multiplatform 1.12.0 and AndroidX Lifecycle 2.11.0 no longer publish `iosX64` binaries. Attempting to declare `iosX64()` results in Gradle dependency resolution failure. Modern iOS development is 100% ARM64:
+- `iosSimulatorArm64()`: Apple Silicon Macs running iOS Simulator (iPhone 17, iOS 26.5)
+- `iosArm64()`: Physical 64-bit iPhone and iPad hardware
+
+#### Build Dependency Sequence
+The four libraries were built and verified in topological dependency order:
+1. `:circum`
+2. `:gepetto-utils` (depends on `:circum`)
+3. `:gclog` (depends on `:gepetto-utils`)
+4. `:ads-lib` (depends on `:gepetto-utils` and `:gclog`)
+
+---
+
+#### 6.1.1 `:circum` Module
+- **`circum/build.gradle.kts`**: Added `iosArm64()` and `iosSimulatorArm64()`.
+- **`circum/src/iosMain/kotlin/club/gepetto/circum/CircumIntentProcessorFunctions.ios.kt`**:
+  ```kotlin
+  package club.gepetto.circum
+
+  import platform.darwin.dispatch_async
+  import platform.darwin.dispatch_get_main_queue
+
+  internal actual fun runOnMainThread(action: () -> Unit) {
+      dispatch_async(dispatch_get_main_queue()) {
+          action()
+      }
+  }
+  ```
+
+---
+
+#### 6.1.2 `:gepetto-utils` Module
+- **`gepetto-utils/build.gradle.kts`**:
+  - Configured `applyDefaultHierarchyTemplate()` inside `kotlin { ... }`.
+  - Added `iosArm64()` and `iosSimulatorArm64()`.
+  - Added `named("iosMain") { dependencies { implementation(libs.ktor.client.darwin) } }`.
+- **`gradle/libs.versions.toml`**:
+  - Added `ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktorClientCore" }`.
+  - Synced library version properties: `circumVersion = "2.1.1"`, `gepettoUtilsVersion = "2.1.1"`, `gcLogVersion = "0.1.1"`, `gepettoAdsLib = "0.4.1"`.
+- **Created 11 iOS Actual Files in `gepetto-utils/src/iosMain/kotlin/`**:
+  1. `club/gepetto/composeutils/PlatformFile.ios.kt`: Complete iOS file system actual using `NSFileManager` and `NSData`. Includes `@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)`, empty byte array guard before `pinned.addressOf(0)`, and path normalization in constructors and `parentFile`.
+  2. `club/gepetto/composeutils/PlatformBitmap.ios.kt`: `actual class PlatformBitmap(val imageBitmap: ImageBitmap)` with `toImageBitmap()` extension.
+  3. `club/gepetto/composeutils/PlatformHttpClient.ios.kt`: `createPlatformHttpClient` configured with `Darwin` engine.
+  4. `club/gepetto/composeutils/GcCurrentTimeMillis.ios.kt`: `gcCurrentTimeMillis()` via `(NSDate().timeIntervalSince1970 * 1000.0).toLong()`.
+  5. `club/gepetto/composeutils/Actuals.ios.kt`: `Context`, `QrCodeView`, `isAndroidPlatform = false`, `BackHandler`, drawable/asset stubs, and `textAsBitmap`.
+  6. `club/gepetto/composeutils/GcQrCodeScanner.ios.kt`: Composable UI placeholder for iOS QR scanning.
+  7. `club/gepetto/composeutils/image/ImageActuals.ios.kt`: `LegacyImageResource`, `GcFullImagePopup`, and Coil3 `gCnewImageLoader(PlatformContext.INSTANCE)`.
+  8. `club/gepetto/composeutils/webpage/WebComposeUtils.ios.kt`: `GcHtmlView`, `GcHtmlText`, and `GcHtmlFile`.
+  9. `club/gepetto/utils/Dispatcher.ios.kt`: `actual val ioDispatcher: CoroutineDispatcher = Dispatchers.Default`.
+  10. `club/gepetto/utils/Utils.ios.kt`: `gCSpeak` using lazy `AVSpeechSynthesizer()` to prevent audio engine initialization before app runloop is active; `isRunningOnChromebook = false`.
+  11. `club/gepetto/utils/GcAppInfo.ios.kt`: `actual object GcAppInfo` application metadata holder.
+
+---
+
+#### 6.1.3 `:gclog` Module
+- **`gclog/build.gradle.kts`**: Added `iosArm64()` and `iosSimulatorArm64()`.
+- **`gclog/src/iosMain/kotlin/club/gepetto/GcLog.kt`**:
+  - Implemented under `package club.gepetto` (matching common expect package).
+  - Implemented `formatString` with regex specifier replacement (`%[\\d\\.]*[a-zA-Z]`), `getStackTag() = "GcLogIos"`, and format-string-safe `NSLog("%s", fullMessage)`.
+
+---
+
+#### 6.1.4 `:ads-lib` Module
+- **`ads-lib/build.gradle.kts`**: Added `iosArm64()` and `iosSimulatorArm64()`.
+- **`ads-lib/src/iosMain/kotlin/club/gepetto/gcadslib/Actuals.ios.kt`**:
+  - Implemented `Bundle`, `initMobileAds`, `initAnalytics`, `initAnalyticsAndAds`.
+  - Implemented persistent first-launch detection in `checkFirstRun(context)` via `NSUserDefaults.standardUserDefaults`.
+  - Implemented `actual object AnalyticsTracker` with all tracking methods.
+- **`ads-lib/src/iosMain/kotlin/club/gepetto/gcadslib/ui/ActualsUi.ios.kt`**:
+  - Implemented `NativeAd`, `AdInterstitial`, `InterstitialAd`, and composable stubs for all ad sizes (`QuarterScreen`, `EightScreen`, `HalfScreen`, `Banner`, `LargeBanner`, `FullBanner`, `Leaderboard`, `MediumRectangle`, `AdNative`, `AdBanner`, `AdBannerAdaptive`, `GcAd`).
+
+---
+
+#### 6.1.5 Publishing to `mavenLocal()` & Target Verification
+- **Publish Command**:
+  ```bash
+  cd /Users/luizvaldetaro/valdetaro/gepetto-utils
+  ./gradlew --no-daemon publishToMavenLocal
+  ```
+  Successfully published all 4 modules (`BUILD SUCCESSFUL in 46s`). Verified presence of both `iossimulatorarm64` and `iosarm64` klib, metadata, and POM files under `~/.m2/repository/club/gepetto/`.
+
+- **Regression & iOS Verification**:
+  ```bash
+  # Existing targets (Android, Desktop, WasmJs)
+  ./gradlew --no-daemon compileDebugKotlinAndroid compileKotlinDesktop compileKotlinWasmJs
+  # Result: BUILD SUCCESSFUL in 19s
+
+  # iOS targets across all 4 modules
+  ./gradlew --no-daemon compileKotlinIosSimulatorArm64 compileKotlinIosArm64
+  # Result: BUILD SUCCESSFUL in 6s
+  ```
 
 ---
 
@@ -1289,12 +1033,14 @@ FunHouse relies on game data files (CSV, JSON, Markdown, text files) located in 
 
 Any agent picking up this plan can execute the phases sequentially using these exact steps:
 
-### Phase 0: Shared Libraries (`gepetto-utils`)
-- [ ] 0.1: Add iOS targets (`iosX64`, `iosArm64`, `iosSimulatorArm64`) and implement `CircumIos.kt` in `gepetto-utils/circum`.
-- [ ] 0.2: Add iOS targets, `ktor-client-darwin`, and implement `PlatformFile.ios.kt`, `Actuals.ios.kt`, `PlatformHttpClient.ios.kt`, `WebComposeUtils.ios.kt`, `Utils.ios.kt` in `gepetto-utils/gepetto-utils`.
-- [ ] 0.3: Add iOS targets and implement `PlatformIos.kt` (in `package club.gepetto`) in `gepetto-utils/gclog`.
-- [ ] 0.4: Add iOS targets and implement full stubs (`Actuals.ios.kt`, `ActualsUi.ios.kt`) matching `Expectations.kt` and `ExpectationsUi.kt` in `gepetto-utils/ads-lib`.
-- [ ] 0.5: Run `./gradlew publishToMavenLocal` inside `/Users/luizvaldetaro/valdetaro/gepetto-utils`.
+### Phase 0: Shared Libraries (`gepetto-utils`) [COMPLETED & PUBLISHED]
+- [x] 0.0: Update `gepetto-utils/gradle/libs.versions.toml` with `ktor-client-darwin` and sync versions (`circum:2.1.1`, `gepetto-utils:2.1.1`, `gclog:0.1.1`, `gcadslib:0.4.1`).
+- [x] 0.1: Add iOS targets (`iosArm64`, `iosSimulatorArm64`) and implement `CircumIntentProcessorFunctions.ios.kt` in `gepetto-utils/circum`.
+- [x] 0.2: Add iOS targets, `applyDefaultHierarchyTemplate()`, `ktor-client-darwin`, and implement 11 actual files (`PlatformFile.ios.kt`, `PlatformBitmap.ios.kt`, `PlatformHttpClient.ios.kt`, `GcCurrentTimeMillis.ios.kt`, `Actuals.ios.kt`, `GcQrCodeScanner.ios.kt`, `ImageActuals.ios.kt`, `WebComposeUtils.ios.kt`, `Dispatcher.ios.kt`, `Utils.ios.kt`, `GcAppInfo.ios.kt`) in `gepetto-utils/gepetto-utils`.
+- [x] 0.3: Add iOS targets and implement `GcLog.kt` (in `package club.gepetto`) with regex format specifiers and safe `NSLog("%s", ...)` in `gepetto-utils/gclog`.
+- [x] 0.4: Add iOS targets and implement `Actuals.ios.kt` (with persistent `NSUserDefaults` first-run) and `ActualsUi.ios.kt` in `gepetto-utils/ads-lib`.
+- [x] 0.5: Run `./gradlew --no-daemon publishToMavenLocal` inside `/Users/luizvaldetaro/valdetaro/gepetto-utils` and verify artifacts under `~/.m2/repository/club/gepetto/`.
+- [x] 0.6: Verify regression-free compilation: `./gradlew --no-daemon compileDebugKotlinAndroid compileKotlinDesktop compileKotlinWasmJs` and `./gradlew --no-daemon compileKotlinIosSimulatorArm64 compileKotlinIosArm64`.
 
 ### Phase 1: FunHouse `:shared:common` Module & Shims
 - [ ] 1.1: Add iOS targets and `-Xallow-kotlin-package` to `FunHouse/shared/common/build.gradle.kts`.
@@ -1352,6 +1098,7 @@ Any agent picking up this plan can execute the phases sequentially using these e
 | 2026-09-17 | Initial Agent | Rev 2: Clarified Google Mobile Ads (AdMob) iOS SDK support, explaining native Apple SDK vs Android AAR, phased integration, ATT prompt, and Info.plist requirements. |
 | 2026-09-17 | Initial Agent | Rev 3: Full Google AdMob iOS integration added into the plan: complete code samples (stubs vs SPM/UIKitView bridge), ATT authorization Swift code, GADApplicationIdentifier crash prevention, SKAdNetworkItems, App Store Privacy Nutrition Labels, and dedicated Phase 5 execution checklist. |
 | 2026-09-18 | Review Agent | Rev 4: Comprehensive audit & update: (1) Synchronized with recent JDK 21 / Kotlin 2.4.20 / Compose 1.12.0 migrations; (2) Fixed `gclog` package mismatch (`club.gepetto`); (3) Corrected `circumIntentProcessor` signature with `@Composable` and `koinInject`; (4) Supplied complete expect/actual stubs for `ads-lib` matching `ExpectationsUi.kt`; (5) Documented full `gepetto-utils` iOS actuals (`PlatformFile`, `createPlatformHttpClient` with `ktor-client-darwin`, `PlatformBitmap`); (6) Reordered Phase 0 build order (`circum` -> `gepetto-utils` -> `gclog` -> `ads-lib`); (7) Added missing `java.io.*` and `Thread` shims to allow 20 game modules to compile; (8) Fixed runtime `ClassCastException` on `AppData.gameFolderFile` by using `File(gamePath)`; (9) Fixed Koin re-initialization crash with `GlobalContext.getOrNull()`; (10) Added automated Python generator for `iosApp.xcodeproj`. |
+| 2026-09-18 | Execution Agent | Rev 5: Phase 0 Completed & Verified. Added modern Apple iOS targets (`iosArm64`, `iosSimulatorArm64`) to all 4 libraries in `gepetto-utils` (`circum:2.1.1`, `gepetto-utils:2.1.1`, `gclog:0.1.1`, `gcadslib:0.4.1`), created all 15 native iOS actual files, published all klibs and artifacts to `mavenLocal()`, verified existing Android/Desktop/WasmJs and iOS targets cleanly without regressions. Advanced roadmap to Phase 1. |
 
 ---
 
@@ -1359,7 +1106,7 @@ Any agent picking up this plan can execute the phases sequentially using these e
 
 | ID | Module / Component | Description | Status | Workaround / Resolution |
 |---|---|---|---|---|
-| BUG-001 | `gepetto-utils` | iOS targets not declared in `gepetto-utils` library | Open (Phase 0) | Implement iOS targets in dependency order and publish to `mavenLocal()`. |
+| BUG-001 | `gepetto-utils` | iOS targets not declared in `gepetto-utils` library | Resolved in Phase 0 | Implemented `iosArm64()` and `iosSimulatorArm64()` in all 4 libraries and published to `mavenLocal()`. |
 | BUG-002 | `funhouse-engine-kotlin` | Platform-specific WebSocket & Concurrency code on JVM/Android | Open (Phase 2) | Implement Coroutine Channel queue, usleep, `objc_sync_enter/exit`, and stubs for discovery/sockets. |
 | BUG-003 | App Store Review | Risk of rejection due to undeclared casino games | Documented (Phase 6) | Declare "Simulated Gambling" in Age Rating questionnaire (12+/17+ rating). |
 | BUG-004 | App Store Review | Risk of rejection if "Tetric" infringes Tetris trademark | Documented (Phase 6) | Ensure `AppData.secretGamesEnabled = false` for release builds. |
@@ -1369,5 +1116,7 @@ Any agent picking up this plan can execute the phases sequentially using these e
 | BUG-008 | `composeApp` | `ClassCastException` on `AppData.gameFolderFile as File` | Resolved in Rev 4 | Set `AppData.gameFolderFile = File(gamePath)` using the iOS `File` shim instead of raw `String`. |
 | BUG-009 | `composeApp` | `KoinAppAlreadyStartedException` when SwiftUI recreates `MainViewController` | Resolved in Rev 4 | Guard `startKoin` with `if (GlobalContext.getOrNull() == null)`. |
 | BUG-010 | `gclog` | Package mismatch between `club.gepetto.gclog` and common `club.gepetto` | Resolved in Rev 4 | Use `package club.gepetto` for iOS actuals. |
+| BUG-011 | Modern KMP / Compose 1.12.0 | `iosX64` targets fail dependency resolution | Resolved in Phase 0 | Target modern Apple Silicon: `iosSimulatorArm64` (simulator) and `iosArm64` (device). |
+| BUG-012 | `gepetto-utils` / coroutines | `Dispatchers.IO` is internal in Kotlin/Native coroutines | Resolved in Phase 0 | Used `Dispatchers.Default` for iOS `ioDispatcher` (matching WasmJs behavior). |
 
 *(Agents executing this plan: Add new entries above whenever a bug or obstacle is encountered during implementation)*

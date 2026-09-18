@@ -1,6 +1,7 @@
 # Phase 0 Sub-Plan: gepetto-utils iOS Target Support
 
 > **Parent Plan**: [IOS_PORT_PLAN.md](file:///Users/luizvaldetaro/valdetaro/FunHouse/.agents/IOS_PORT_PLAN.md)  
+> **Status**: **COMPLETED & VERIFIED (2026-09-18)** — Published to `mavenLocal()`  
 > **Scope**: Phase 0 only — Add iOS targets to all 4 `gepetto-utils` libraries and publish to `mavenLocal()`  
 > **Project Path**: `/Users/luizvaldetaro/valdetaro/gepetto-utils`  
 > **Build Order**: `circum` → `gepetto-utils` → `gclog` → `ads-lib` (strict topological)  
