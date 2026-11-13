@@ -4,7 +4,7 @@
 > **Target Application**: FunHouse Game Collection (`/Users/luizvaldetaro/valdetaro/FunHouse`)  
 > **Workspace**: `/Users/luizvaldetaro/valdetaro`  
 > **Document Location**: `.agents/IOS_PORT_PLAN.md`  
-> **Last Updated**: 2026-09-18 (Rev 5 — Phase 0 completed & verified: all 4 gepetto-utils shared libraries built for iosArm64 / iosSimulatorArm64 and published to mavenLocal(), advancing master plan to Phase 1)  
+> **Last Updated**: 2026-11-13 (Rev 6 — Audit vs. codebase: fixed library paths/build order, removed `iosX64`, completed iOS shims (Phase 1 would not compile Phase 2 as written), fixed resource install path, removed invalid framework `export`, replaced non-functional Xcode generator with XcodeGen, added Privacy Manifest, updated App Store age ratings)  
 > **Current Phase**: Phase 1 (Core Models & Shims in :shared:common)
 
 ---
@@ -49,23 +49,26 @@ The Gradle build consists of 22 modules:
 2. `:shared:common`: Domain models (`Game`, `AppData`), sound player interfaces, file utilities, runtime platform shims, and common UI helpers.
 3. 20 feature modules (`:feature:*`): Each housing self-contained game logic and UI.
 
-The app depends on four shared KMP libraries in `~/valdetaro/gepetto-utils`:
-- `club.gepetto:gepetto-utils:2.1.1`
-- `club.gepetto:circum:2.1.1`
-- `club.gepetto:gclog:0.1.1`
-- `club.gepetto:gcadslib:0.4.1`
+The app depends on four shared KMP libraries. Each one is a **standalone Gradle project** under `~/valdetaro/GepettoLabs/` (the old multi-module `~/valdetaro/gepetto-utils` directory no longer exists):
+- `GepettoLabs/gepetto-utils` → `club.gepetto:gepetto-utils` (FunHouse uses `2.1.2`)
+- `GepettoLabs/circum` → `club.gepetto:circum` (`2.1.1`)
+- `GepettoLabs/gclog` → `club.gepetto:gclog`
+- `GepettoLabs/ads-lib` → `club.gepetto:gcadslib` (`0.4.1`)
 
-### Current Toolchain & Dependencies (Updated 2026-09-18)
+All four already publish `iosArm64` / `iosSimulatorArm64` artifacts **to Maven Central** (verified 2026-11-13: gepetto-utils 2.1.3, circum 2.1.2, gclog 0.1.2, gcadslib 0.4.2), so other development machines do not need `mavenLocal()` for iOS.
+
+### Current Toolchain & Dependencies (Updated 2026-11-13)
 - **Java/JDK**: OpenJDK 21 (`JavaVersion.VERSION_21`, `JVM_21`)
 - **Gradle Wrapper**: 9.7.1
-- **Kotlin**: 2.4.20
+- **Kotlin**: 2.4.21
+- **App version**: `versionName = 2.1.64`, `versionCode = 164` (from `gradle/libs.versions.toml` — never hardcode these in iOS code)
 - **Android Gradle Plugin (AGP)**: 9.4.0
 - **JetBrains Compose Multiplatform**: 1.12.0
 - **Navigation 3**: `androidx.navigation3:1.1.7`, `androidx.compose.material3.adaptive:1.3.0`
 
 ### Current Porting Obstacle
-Currently, neither `gepetto-utils` nor `FunHouse` declares Apple iOS targets (`iosArm64`, `iosSimulatorArm64`, `iosX64`). To run on iOS:
-1. Shared libraries must build for iOS targets and publish to `mavenLocal()`.
+The shared libraries support iOS (Phase 0 done). `FunHouse` does not yet declare Apple iOS targets (`iosArm64`, `iosSimulatorArm64`; `iosX64` is NOT supported — see BUG-011). To run on iOS:
+1. ~~Shared libraries must build for iOS targets and publish~~ — done (Maven Central + `mavenLocal()`).
 2. FunHouse Gradle configurations must add iOS targets.
 3. Native Apple framework bindings (`AVSpeechSynthesizer`, `NSFileManager`, `AVAudioPlayer`, `NSCalendar`) and Java/Android runtime shims (`java.io.File`, `BufferedReader`, `Thread.sleep`, `Random`) must be provided for `shared:common` and `funhouse-engine-kotlin`.
 4. An `iosApp` Xcode project shell must be generated to wrap the Compose Multiplatform UI (`ComposeUIViewController`) into a native iOS application.
@@ -80,8 +83,10 @@ Because you have 0 experience developing for iOS and do not own an iOS device, h
 - **Machine**: You are running macOS on an Apple Silicon / Intel Mac.
 - **JDK**: Java 21 is required for all Gradle builds and builds run with `./gradlew`.
 - **Xcode**: Apple's official IDE and toolchain for iOS.
-  - Verification confirms Xcode is installed at `/Applications/Xcode.app` (Xcode 27.0) and active developer directory points to `/Applications/Xcode.app/Contents/Developer`.
-  - iOS Simulator Runtime: **iOS 26.5** is installed and ready.
+  - Verification (2026-11-13) confirms Xcode is installed at `/Applications/Xcode.app` (Xcode 27.2, build 27B52) and active developer directory points to `/Applications/Xcode.app/Contents/Developer`.
+  - iOS Simulator Runtime: **iOS 26.5** is installed; available devices include iPhone 17, 17 Pro, 17 Pro Max, 17e.
+  - Development happens on more than one Mac: run the Section 2.2 commands on each machine before building.
+- **XcodeGen** (used to generate `iosApp.xcodeproj`, see 6.5.3): `brew install xcodegen`.
 
 ### 2.2 First-Time Setup Commands
 Run these commands once in your terminal to ensure permissions and licenses are accepted:
@@ -141,15 +146,18 @@ Once the iOS target and Xcode project are set up:
 
 2. **Build and Run via Terminal (`xcodebuild` + `simctl`)**:
    ```bash
-   # Build the Xcode scheme targeting the booted simulator
+   # Generate the Xcode project (see 6.5.3), then build for the simulator
+   (cd iosApp && xcodegen)
    xcodebuild -project iosApp/iosApp.xcodeproj \
               -scheme iosApp \
               -destination 'platform=iOS Simulator,name=iPhone 17' \
               -configuration Debug \
+              -derivedDataPath iosApp/build \
               build
 
    # Install the built .app onto the booted simulator
-   xcrun simctl install booted iosApp/build/Debug-iphonesimulator/iosApp.app
+   # (-derivedDataPath fixes the output location; without it the .app goes to ~/Library/Developer/Xcode/DerivedData)
+   xcrun simctl install booted iosApp/build/Build/Products/Debug-iphonesimulator/iosApp.app
 
    # Launch the app
    xcrun simctl launch booted com.gepetto.gamescollection
@@ -190,15 +198,15 @@ Once enrolled:
 
 ### 4.3 Step 3: App Store Approval Guidelines & FunHouse Specific Gotchas
 
-#### A. Guideline 4.7: Mini-Apps & Game Collections
-- FunHouse contains 20 classic games in one binary. Apple explicitly allows game collections and retro game engines under Guideline 4.7, provided all software inside complies with privacy and content rules, and does not require third-party app stores.
-- Every game in the collection must be fully functional and stable.
+#### A. Game Collections (Guidelines 2.1 / 4.2)
+- FunHouse contains 20 classic games compiled into one binary. This is an ordinary app. Guideline 4.7 (mini apps, HTML5 mini games, streaming games, emulators) does **not** apply, because no game code is downloaded or run outside the binary.
+- Every game in the collection must be fully functional and stable (Guideline 2.1 — App Completeness). A game that crashes or shows an empty screen on iOS is a rejection risk; hide it on iOS until it works.
 
 #### B. The "Simulated Gambling" Age Rating Gotcha (CRITICAL)
 - FunHouse includes **Blackjack**, **Craps**, **Roulette**, **Slot Machine**, and **Poker**.
 - In the App Store Connect Age Rating questionnaire, you **MUST** declare:
   - **Simulated Gambling**: Answer **"Frequent / Intense"** (or "Infrequent/Mild").
-  - Apple will automatically assign a **12+** or **17+** age rating.
+  - Apple calculates the rating from the answers. Apple's current rating scale (since 2025) is **4+, 9+, 13+, 16+, 18+** — the old 12+/17+ values no longer exist. Expect a 13+ or higher rating; read the result in App Store Connect after you answer.
   - **Crucial Note**: The app description must clearly state:
     > *"All casino games (Blackjack, Craps, Roulette, Slot Machine, Poker) are for entertainment purposes only. The app uses virtual chips and credits. No real money gambling or real prizes are offered or won."*
   - Failure to declare simulated gambling will result in immediate rejection under Guideline 2.3 (Accurate Metadata).
@@ -222,15 +230,54 @@ Once enrolled:
 <string>FunHouse uses the local network to discover and connect with other players for multiplayer adventure games.</string>
 <key>NSBonjourServices</key>
 <array>
-    <string>_funhouse._tcp</string>
+    <!-- Must match the Android NSD type in NsdHelper.kt ("_funhouse-game._tcp.") -->
+    <string>_funhouse-game._tcp</string>
 </array>
 ```
+> [!NOTE]
+> The local network keys are only needed when iOS multiplayer is implemented. Phase 2 uses stubs for sockets and discovery, so leave these keys out of the first builds.
+
+#### E.2 Mandatory Privacy Manifest (`PrivacyInfo.xcprivacy`)
+Since May 2024 Apple rejects uploads that use "required reason" APIs without a privacy manifest. FunHouse (through `gcadslib` and `gepetto-utils`) uses:
+- `NSUserDefaults` (`checkFirstRun` in ads-lib) → category `NSPrivacyAccessedAPICategoryUserDefaults`, reason `CA92.1`.
+- File timestamps (`NSFileModificationDate` in `PlatformFile.lastModified`) → category `NSPrivacyAccessedAPICategoryFileTimestamp`, reason `C617.1`.
+
+Add `iosApp/iosApp/PrivacyInfo.xcprivacy` to the app target:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSPrivacyTracking</key>
+    <false/>
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array/>
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array>
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array><string>CA92.1</string></array>
+        </dict>
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array><string>C617.1</string></array>
+        </dict>
+    </array>
+</dict>
+</plist>
+```
+Update this file in Phase 5 if AdMob is added (the Google SDK ships its own manifest, but `NSPrivacyTracking` and collected data types for the app must then be updated).
 
 #### F. App Store Assets
 - **App Icon**: 1024x1024 PNG (no transparency, square corners — iOS applies corner rounding automatically).
 - **Screenshots**:
-  - 6.7-inch iPhone (iPhone 16/17 Pro Max) — 1290 x 2796 px or 1320 x 2868 px.
-  - 12.9-inch iPad Pro — 2048 x 2732 px.
+  - 6.9-inch iPhone (iPhone 17 Pro Max simulator) — 1320 x 2868 px (the 6.9" set is the required iPhone set; smaller sizes are scaled from it).
+  - 13-inch iPad — 2064 x 2752 px (or 2048 x 2732 px), required only if iPad is supported.
+  - Check the current required sizes in App Store Connect before capture.
   - Can be captured directly from Xcode Simulator (`Cmd + S`).
 
 #### G. Google AdMob & App Store Privacy / ATT Compliance (Mandatory for iOS Monetization)
@@ -240,6 +287,7 @@ Once enrolled:
 2. **`GADApplicationIdentifier` in `Info.plist` (CRITICAL CRASH RISK)**:
    - Google AdMob on iOS **will crash on launch** with `NSInvalidArgumentException` if `GADApplicationIdentifier` is missing.
 3. **SKAdNetwork Identifiers**: Must be added to `Info.plist`.
+4. **Consent (EEA/UK)**: Google requires a certified consent platform for personalized ads in the EEA/UK. Use Google's User Messaging Platform (UMP) SDK and show its form before the ATT prompt.
 
 ---
 
@@ -253,10 +301,10 @@ Once enrolled:
          +---------------------------------+---------------------------------+
          |                                                                   |
          v                                                                   v
- [gepetto-utils Project]                                             [FunHouse Project]
-  Step 0.1: circum         (leaf dependency)                         Step 1: shared:common
-  Step 0.2: gepetto-utils  (depends on circum)                               (iOS actuals + runtime shims)
-  Step 0.3: gclog          (depends on gepetto-utils)                        |
+ [GepettoLabs/* (4 projects)] [DONE]                                 [FunHouse Project]
+  Step 0.1: circum         (no deps)                                 Step 1: shared:common
+  Step 0.2: gclog          (no deps)                                         (iOS actuals + runtime shims)
+  Step 0.3: gepetto-utils  (depends on circum)                               |
   Step 0.4: ads-lib        (depends on gepetto-utils & gclog)                v
          |                                                           Step 2: 20 Feature Game Modules
          +------------------ publishToMavenLocal -------------------> Step 3: funhouse-engine-kotlin
@@ -269,7 +317,7 @@ Once enrolled:
 ```
 
 ### Execution Strategy
-1. **Phase 0 (Foundation)**: Add iOS targets to shared libraries in `gepetto-utils` in correct topological dependency order (`circum` -> `gepetto-utils` -> `gclog` -> `ads-lib`) and publish to `mavenLocal()`.
+1. **Phase 0 (Foundation) [DONE]**: iOS targets added to the 4 libraries under `GepettoLabs/` in dependency order (`circum` -> `gclog` -> `gepetto-utils` -> `ads-lib`, as in `GepettoLabs/publishlocal`) and published (mavenLocal and Maven Central).
 2. **Phase 1 (Core Models & Shims)**: Add iOS targets to `:shared:common` and implement native iOS actuals (TTS, files, time, sound) PLUS Java/Android runtime shims (`java.io.File`, `BufferedReader`, `Thread.sleep`, `Random`).
 3. **Phase 2 (Game Features)**: Add iOS targets to all 20 `:feature:*` modules and provide iOS actuals for `funhouse-engine-kotlin`.
 4. **Phase 3 (App Shell)**: Add iOS static framework target to `:composeApp` and generate the `iosApp` Xcode project.
@@ -281,8 +329,8 @@ Once enrolled:
 
 ## 6. Detailed Technical Specification by Module
 
-#### 6.1 Step 0: Shared Libraries (`gepetto-utils`) KMP iOS Support [COMPLETED & PUBLISHED]
-Path: `/Users/luizvaldetaro/valdetaro/gepetto-utils`
+#### 6.1 Step 0: Shared Libraries (`GepettoLabs`) KMP iOS Support [COMPLETED & PUBLISHED]
+Path: `/Users/luizvaldetaro/valdetaro/GepettoLabs/{circum,gclog,gepetto-utils,ads-lib}` — four **standalone** Gradle projects (each has its own `gradlew` and `gradle/libs.versions.toml`). The text below records the work as it was done in Rev 5, when the libraries were still one multi-module project at `~/valdetaro/gepetto-utils`; that directory no longer exists. Module paths such as `circum/build.gradle.kts` now mean `GepettoLabs/circum/circum/build.gradle.kts`.
 
 > [!NOTE]
 > **Phase 0 Status: COMPLETE & PUBLISHED TO MAVENLOCAL (2026-09-18)**  
@@ -300,11 +348,11 @@ Compose Multiplatform 1.12.0 and AndroidX Lifecycle 2.11.0 no longer publish `io
 - `iosArm64()`: Physical 64-bit iPhone and iPad hardware
 
 #### Build Dependency Sequence
-The four libraries were built and verified in topological dependency order:
-1. `:circum`
-2. `:gepetto-utils` (depends on `:circum`)
-3. `:gclog` (depends on `:gepetto-utils`)
-4. `:ads-lib` (depends on `:gepetto-utils` and `:gclog`)
+Correct dependency order (matches `GepettoLabs/publishlocal`):
+1. `circum` (no internal deps)
+2. `gclog` (no internal deps — it does **not** depend on gepetto-utils)
+3. `gepetto-utils` (depends on `circum`)
+4. `ads-lib` (depends on `gepetto-utils` and `gclog`)
 
 ---
 
@@ -369,12 +417,12 @@ The four libraries were built and verified in topological dependency order:
 ---
 
 #### 6.1.5 Publishing to `mavenLocal()` & Target Verification
-- **Publish Command**:
+- **Publish Command (current layout)**:
   ```bash
-  cd /Users/luizvaldetaro/valdetaro/gepetto-utils
-  ./gradlew --no-daemon publishToMavenLocal
+  cd /Users/luizvaldetaro/valdetaro/GepettoLabs
+  ./publishlocal
   ```
-  Successfully published all 4 modules (`BUILD SUCCESSFUL in 46s`). Verified presence of both `iossimulatorarm64` and `iosarm64` klib, metadata, and POM files under `~/.m2/repository/club/gepetto/`.
+  (`publishlocal` runs `./gradlew publishToMavenLocal` in `circum`, `gclog`, `gepetto-utils`, `ads-lib`, in that order.) In Rev 5 all 4 modules were published (`BUILD SUCCESSFUL in 46s`). Verified presence of both `iossimulatorarm64` and `iosarm64` klib, metadata, and POM files under `~/.m2/repository/club/gepetto/`.
 
 - **Regression & iOS Verification**:
   ```bash
@@ -401,8 +449,8 @@ Add iOS targets to `shared/common/build.gradle.kts`.
 ```kotlin
 kotlin {
     // Android, JVM desktop, WasmJs...
+    // iosX64 is NOT supported by Compose 1.12 / Lifecycle 2.11 (BUG-011) — do not add it.
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
@@ -414,12 +462,34 @@ kotlin {
 ```
 
 ### 6.2.2 Critical Runtime Shims in `shared/common/src/iosMain/kotlin/`
-12+ game modules import `java.io.*` and `Thread` in `commonMain`. Provide these shims in `src/iosMain/kotlin/`:
+Game modules use JVM APIs (`java.io.*`, `java.util.Random`, `Thread`, `Math`, `System`, `removeIf`, `ticker`) in `commonMain`. The web build already solves this with shims in `shared/common/src/wasmJsMain/kotlin/`. The iOS shims follow the same packages and the same API surface. **Rule: every public declaration in the wasm shims that common code uses must also exist in the iOS shims.** Before Phase 2, diff the two folders.
+
+Usages in common code that the shims must cover (found 2026-11-13):
+| API | Used in |
+|---|---|
+| `java.io.File`, `BufferedReader`, `BufferedWriter`, `FileReader`, `IOException`, `Serializable` | many modules (14 `import java.io.File`) |
+| `java.util.Random(seed)` | `ChimaeraKotlin.kt:543`, `WizardsCastleKotlin.kt:716` |
+| `Thread.sleep` | castle, chimaera, colossal-cave, dinkum, wizards-castle, `FunHouseIntentProcessor.kt:400` |
+| `InterruptedException("…")` (String constructor) | `CastleKotlin.kt:1084` and the other `myExit` functions |
+| `System.err.println` | `AdventureKotlin.kt:345` |
+| `Math.abs/min/max` (Int), `Math.toRadians` | chess `ChessAI.kt`, dinkum, `PinballView.kt:443` |
+| `MutableCollection.removeIf` | `InvadersView.kt:154` |
+| `kotlinx.coroutines.channels.ticker` (JVM-only API) | tetric `GameButton.kt:50` |
+| `android.content.Context`, `android.media.*`, `SuppressLint`, `LocalContext` | various |
+
+`kotlinx.coroutines.IO` does **not** need a shim on iOS: `Dispatchers.IO` is public on Kotlin/Native (import `kotlinx.coroutines.IO`, as `FunHouseIntentProcessor` already does). Do **not** copy `wasmJsMain/kotlin/kotlinx/coroutines/DispatchersIO.kt` to iOS — it would clash with the real declaration.
+
+`kotlin.concurrent.thread` and `java.util.concurrent.LinkedBlockingQueue` exist in the wasm shims but are not used by common code today (games use coroutines and `GcInputQueue`). Do not port them unless a compile error asks for them.
+
+Threading note: text games run their loop in `CoroutineScope(Dispatchers.Default)`, so a blocking `Thread.sleep` (via `usleep`) blocks a worker thread, not the UI thread. This matches desktop behavior.
 
 #### A. `java/io/File.kt`:
 ```kotlin
+@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
 package java.io
 
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.usePinned
 import platform.Foundation.*
 
 interface Serializable
@@ -465,13 +535,25 @@ class FileImpl(override val path: String) : File {
         nsStr.writeToFile(path, atomically = true, encoding = NSUTF8StringEncoding, error = null)
     }
 
-    override fun readBytes(): ByteArray = readText().encodeToByteArray()
+    // Binary-safe: do NOT go through readText() (it corrupts images and other binary files).
+    override fun readBytes(): ByteArray {
+        val data = NSData.dataWithContentsOfFile(path) ?: return ByteArray(0)
+        val size = data.length.toInt()
+        if (size == 0) return ByteArray(0)
+        return ByteArray(size).apply {
+            usePinned { pinned -> platform.posix.memcpy(pinned.addressOf(0), data.bytes, data.length) }
+        }
+    }
     override fun bufferedReader(): BufferedReader = BufferedReader(this)
     override fun bufferedWriter(): BufferedWriter = BufferedWriter(this)
+    // Binary-safe copy through NSFileManager.
     override fun copyTo(target: File, overwrite: Boolean): File {
-        if (overwrite || !target.exists()) {
-            target.writeText(this.readText())
+        val fm = NSFileManager.defaultManager
+        if (fm.fileExistsAtPath(target.path)) {
+            if (!overwrite) return target
+            fm.removeItemAtPath(target.path, error = null)
         }
+        fm.copyItemAtPath(path, toPath = target.path, error = null)
         return target
     }
     override fun forEachLine(action: (String) -> Unit) {
@@ -545,15 +627,18 @@ package java.util
 
 import kotlin.random.Random as KotlinRandom
 
+// The seed MUST be honored: Chimaera and Wizard's Castle create seeded generators.
+// (The sequence differs from java.util.Random's LCG, but the same seed gives the same sequence on iOS.)
 class Random {
-    constructor()
-    constructor(seed: Long)
-    fun nextInt(): Int = KotlinRandom.nextInt()
-    fun nextInt(bound: Int): Int = KotlinRandom.nextInt(bound)
-    fun nextDouble(): Double = KotlinRandom.nextDouble()
-    fun nextFloat(): Float = KotlinRandom.nextFloat()
-    fun nextLong(): Long = KotlinRandom.nextLong()
-    fun nextBoolean(): Boolean = KotlinRandom.nextBoolean()
+    private val rnd: KotlinRandom
+    constructor() { rnd = KotlinRandom.Default }
+    constructor(seed: Long) { rnd = KotlinRandom(seed) }
+    fun nextInt(): Int = rnd.nextInt()
+    fun nextInt(bound: Int): Int = rnd.nextInt(bound)
+    fun nextDouble(): Double = rnd.nextDouble()
+    fun nextFloat(): Float = rnd.nextFloat()
+    fun nextLong(): Long = rnd.nextLong()
+    fun nextBoolean(): Boolean = rnd.nextBoolean()
 }
 
 class Locale {
@@ -566,8 +651,11 @@ class Locale {
 ```kotlin
 package kotlin
 
+import java.io.PrintWriter
 import platform.Foundation.NSDate
 import platform.Foundation.timeIntervalSince1970
+import kotlin.math.pow as kotlinPow
+import kotlin.math.round as kotlinRound
 
 class Thread {
     private var interrupted = false
@@ -576,27 +664,97 @@ class Thread {
 
     companion object {
         fun sleep(millis: Long) {
-            platform.posix.usleep((millis * 1000L).toUInt())
+            if (millis <= 0) return
+            // Sleep in chunks below 1 s: usleep() may reject values >= 1,000,000 µs.
+            var remaining = millis
+            while (remaining > 0) {
+                val chunk = minOf(remaining, 900L)
+                platform.posix.usleep((chunk * 1000L).toUInt())
+                remaining -= chunk
+            }
         }
         fun currentThread(): Thread = Thread()
     }
 }
 
-class InterruptedException : Exception()
+// Games call both forms, e.g. throw InterruptedException("Game Restarted") in CastleKotlin.myExit().
+class InterruptedException : Exception {
+    constructor() : super()
+    constructor(message: String) : super(message)
+}
 
 object System {
     fun currentTimeMillis(): Long = (NSDate().timeIntervalSince1970 * 1000.0).toLong()
+    val err = PrintWriter(null)   // used by AdventureKotlin.kt (System.err.println)
     fun exit(status: Int) {}
 }
 
+// Same surface as wasmJsMain/kotlin/kotlin/SystemAndThread.kt
 object Math {
     fun abs(x: Int): Int = kotlin.math.abs(x)
+    fun abs(x: Long): Long = kotlin.math.abs(x)
+    fun abs(x: Float): Float = kotlin.math.abs(x)
+    fun abs(x: Double): Double = kotlin.math.abs(x)
     fun min(a: Int, b: Int): Int = kotlin.math.min(a, b)
+    fun min(a: Long, b: Long): Long = kotlin.math.min(a, b)
+    fun min(a: Float, b: Float): Float = kotlin.math.min(a, b)
+    fun min(a: Double, b: Double): Double = kotlin.math.min(a, b)
     fun max(a: Int, b: Int): Int = kotlin.math.max(a, b)
+    fun max(a: Long, b: Long): Long = kotlin.math.max(a, b)
+    fun max(a: Float, b: Float): Float = kotlin.math.max(a, b)
+    fun max(a: Double, b: Double): Double = kotlin.math.max(a, b)
+    fun pow(a: Double, b: Double): Double = a.kotlinPow(b)
     fun sqrt(x: Double): Double = kotlin.math.sqrt(x)
     fun random(): Double = kotlin.random.Random.nextDouble()
+    fun round(x: Double): Long = kotlinRound(x).toLong()
+    fun floor(x: Double): Double = kotlin.math.floor(x)
+    fun ceil(x: Double): Double = kotlin.math.ceil(x)
+    fun toRadians(angdeg: Double): Double = angdeg / 180.0 * kotlin.math.PI   // PinballView.kt
 }
 ```
+
+#### C.2 `kotlin/collections/CollectionsCompat.kt` (copy of the wasm shim — used by `InvadersView.kt`):
+```kotlin
+package kotlin.collections
+
+inline fun <T> MutableCollection<T>.removeIf(filter: (T) -> Boolean): Boolean {
+    val iterator = iterator()
+    var removed = false
+    while (iterator.hasNext()) {
+        if (filter(iterator.next())) { iterator.remove(); removed = true }
+    }
+    return removed
+}
+```
+
+#### C.3 `kotlinx/coroutines/channels/TickerShim.kt` (copy of the wasm shim — `ticker` is JVM-only; used by tetric `GameButton.kt`):
+```kotlin
+package kotlinx.coroutines.channels
+
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+@ObsoleteCoroutinesApi
+fun ticker(
+    delayMillis: Long,
+    initialDelayMillis: Long = 0,
+    context: kotlin.coroutines.CoroutineContext = kotlin.coroutines.EmptyCoroutineContext,
+    mode: Any? = null
+): ReceiveChannel<Unit> {
+    val channel = Channel<Unit>(Channel.CONFLATED)
+    @OptIn(DelicateCoroutinesApi::class)
+    GlobalScope.launch(context) {
+        delay(initialDelayMillis)
+        while (true) { channel.send(Unit); delay(delayMillis) }
+    }
+    return channel
+}
+```
+> [!NOTE]
+> This shim (like the wasm one) never stops the coroutine after `channel.cancel()`; `send` then throws and ends it. That matches web behavior, so keep it for parity.
 
 #### D. `android/` and `androidx/` shims:
 - `android/content/Context.kt`:
@@ -644,8 +802,13 @@ import androidx.compose.ui.graphics.ImageBitmap
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import com.funhouse.shared.common.generated.resources.Res
+import club.gepetto.GcLog
 
-private val speechSynthesizer = AVSpeechSynthesizer()
+// Lazy: do not start the audio engine before the app run loop is active (same as gepetto-utils Utils.ios.kt).
+private val speechSynthesizer by lazy { AVSpeechSynthesizer() }
 
 actual fun speakText(text: String) {
     if (text.isBlank()) return
@@ -674,25 +837,34 @@ actual fun readTextFromFile(fileName: String): String? {
     return NSString.create(data = data, encoding = NSUTF8StringEncoding)?.toString()
 }
 
+// Do NOT guess bundle paths. The desktop build stores files under
+// "composeResources/com.funhouse.shared.common.generated.resources/files/"; the old candidate list
+// left out the "composeResources/" segment, so no path matched and the function returned silently.
+// Use the Compose Resources API instead (the same API the wasm entry point uses).
+@OptIn(ExperimentalResourceApi::class, ExperimentalForeignApi::class)
 actual fun installFile(name: String, overwrite: Boolean) {
     val fileManager = NSFileManager.defaultManager
     val destFolder = AppData.gameFolderFile as? java.io.File ?: return
+    if (!fileManager.fileExistsAtPath(destFolder.path)) destFolder.mkdirs()
     val destPath = "${destFolder.path}/$name"
     if (fileManager.fileExistsAtPath(destPath) && !overwrite) return
 
-    val resPath = NSBundle.mainBundle.resourcePath ?: ""
-    val candidatePaths = listOf(
-        "$resPath/compose-resources/com.funhouse.shared.common.generated.resources/files/$name",
-        "$resPath/compose-resources/files/$name",
-        NSBundle.mainBundle.pathForResource(name, ofType = null) ?: "",
-        NSBundle.mainBundle.pathForResource(name, ofType = null, inDirectory = "compose-resources/files") ?: ""
-    ).filter { it.isNotEmpty() && fileManager.fileExistsAtPath(it) }
-
-    val sourcePath = candidatePaths.firstOrNull() ?: return
-    if (fileManager.fileExistsAtPath(destPath)) {
-        fileManager.removeItemAtPath(destPath, error = null)
+    val bytes: ByteArray = runBlocking {
+        try {
+            Res.readBytes("files/$name")
+        } catch (e: Exception) {
+            try { Res.readBytes("drawable/$name") } catch (e2: Exception) { null }
+        }
+    } ?: run {
+        GcLog.e("installFile: resource not found: $name")
+        return
     }
-    fileManager.copyItemAtPath(sourcePath, toPath = destPath, error = null)
+    val data = bytes.usePinned { pinned ->
+        NSData.create(bytes = pinned.addressOf(0), length = bytes.size.toULong())
+    }
+    if (!data.writeToFile(destPath, atomically = true)) {
+        GcLog.e("installFile: write failed: $destPath")
+    }
 }
 
 @OptIn(ExperimentalForeignApi::class)
@@ -762,8 +934,7 @@ kotlin {
     jvm("desktop") { ... }
     wasmJs { ... }
 
-    // Add iOS targets:
-    iosX64()
+    // Add iOS targets (no iosX64 — BUG-011):
     iosArm64()
     iosSimulatorArm64()
 
@@ -773,7 +944,7 @@ kotlin {
 }
 ```
 
-Because all 19 pure-Kotlin feature modules depend on `:shared:common` and consume its `java.io.*` / `Thread` shims, they will compile cleanly for iOS without any code modifications!
+19 modules have only `commonMain`; `funhouse-engine-kotlin` also has platform source sets (6.4). The 19 modules depend on `:shared:common` and use its shims, so they compile for iOS without code changes **only if** the shims in 6.2.2 are complete (including `InterruptedException(String)`, `System.err`, all `Math` overloads, `removeIf`, and `ticker`). If a feature module fails to compile, fix the shim in `shared/common/src/iosMain`, not the game code (classic games must not change).
 
 ---
 
@@ -840,24 +1011,35 @@ actual fun gcThread(name: String, block: suspend () -> Unit): GcThreadRef {
     return GcThreadRef(job)
 }
 
+// Do NOT use objc_sync_enter/exit on Kotlin objects: they are not Objective-C objects, and the bridge
+// wrapper is not a reliable lock identity. Use one process-wide reentrant lock from atomicfu instead.
+// Coarse, but safe: the engine only locks short sections, and the lock is reentrant for nested calls.
+private val engineLock = kotlinx.atomicfu.locks.reentrantLock()
+
 actual fun <R> gcSynchronized(lock: Any, block: () -> R): R {
-    platform.objc.objc_sync_enter(lock)
+    engineLock.lock()
     try {
         return block()
     } finally {
-        platform.objc.objc_sync_exit(lock)
+        engineLock.unlock()
     }
 }
 
 actual fun getLocalIps(): List<String> = emptyList()
 actual fun isHostPortAvailable(ip: String, port: Int): Boolean = false
 actual fun scanSubnetForHost(myIp: String, networkPort: Int, onHostDiscovered: (String) -> Unit) {}
-actual fun gcSleep(ms: Long) { platform.posix.usleep((ms * 1000L).toUInt()) }
+actual fun gcSleep(ms: Long) { Thread.sleep(ms) } // kotlin.Thread shim from :shared:common (chunked usleep)
 actual fun isWebPlatform(): Boolean = false
 ```
+> [!IMPORTANT]
+> - Add atomicfu through the catalog (rule 8): in `gradle/libs.versions.toml` add `atomicfu = "<latest from Maven Central>"` and `kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }`, then `iosMain.dependencies { implementation(libs.kotlinx.atomicfu) }` in `feature/funhouse-engine-kotlin/build.gradle.kts`.
+> - `gcSleep`: `Thread.sleep(ms)` resolves to the `kotlin.Thread` shim from `:shared:common`. Do not call `usleep` with values >= 1 s directly.
+> - `GcThreadLocal` is a plain field and `isCurrentThread()` always returns true. This is only correct while multiplayer is stubbed (one player). `GengameKotlin` uses `gcThreadLocal { 1 }` for `activePlayerIndex` and `isCurrentThread()` for player-thread cleanup, so real thread identity is required before iOS multiplayer is enabled.
 
 ### 6.4.2 `DiscoveryHelperIos.kt` & `GameSocketIos.kt`
 Match the `desktopMain` stubs initially to allow single-player games (*Island*, *FunHouse*, *Space Station Aegis*) to run immediately.
+
+When iOS multiplayer is implemented later: advertise and browse `_funhouse-game._tcp` (the Android NSD type in `androidMain/.../NsdHelper.kt`), add the local network keys from 4.3.E, and replace `GcThreadLocal` / `isCurrentThread()` with real per-thread implementations.
 
 ---
 
@@ -867,20 +1049,28 @@ Path: `/Users/luizvaldetaro/valdetaro/FunHouse/composeApp`
 ### 6.5.1 Update `composeApp/build.gradle.kts`
 ```kotlin
 kotlin {
-    // Android, JVM desktop, WasmJs...
+    // Android, JVM desktop, WasmJs...  (no iosX64 — BUG-011)
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
-            export(project(":shared:common"))
+            // No export(...): composeApp declares :shared:common as `implementation`, and export()
+            // requires an `api` dependency (the build fails otherwise). Swift only calls
+            // MainViewController(), so nothing needs to be exported.
         }
     }
 }
 ```
+
+Also add an iOS version code to the generated `CommonConfig` (in the `generateCommonConfig` task), so the iOS build never hardcodes the version:
+```kotlin
+// inside the generated object CommonConfig { ... }
+const val iosVersionCode = ${vCode*10+7}L
+```
+Keep `CFBundleShortVersionString` / `CFBundleVersion` in `Info.plist` in sync with `libs.versions.toml` (`versionName`, `versionCode`); see 6.5.3 (XcodeGen reads them from build settings).
 
 ### 6.5.2 Create `composeApp/src/iosMain/kotlin/Main.kt`
 ```kotlin
@@ -928,9 +1118,10 @@ fun MainViewController(): UIViewController {
     AppData.gameFolder = Constants.GAMES_FOLDER
     AppData.gameFolderFile = File(gamePath)
 
-    val vCode = 163L
+    val vCode = CommonConfig.iosVersionCode   // generated; never hardcode (was 163, app is now 164)
     GcAppInfo.versionName = CommonConfig.versionName
     GcAppInfo.versionCode = vCode
+    GcAppInfo.appPackageFolder = basePath     // iOS default is "" — must be set
     GcAppInfo.releaseVersion = true
 
     AppData.version = "${CommonConfig.versionName}/ios"
@@ -948,20 +1139,73 @@ fun MainViewController(): UIViewController {
 }
 ```
 
-### 6.5.3 Automated Xcode Project Generation Script
-To avoid manual GUI project setup, run this python generator script:
+### 6.5.3 Xcode Project Generation (XcodeGen)
+The Rev 4 Python script did not work: it wrote `iOSApp.swift` and `Info.plist` but never wrote `project.pbxproj`, so Xcode could not open the project. Do not hand-write `project.pbxproj`. Use **XcodeGen** (`brew install xcodegen`) with a checked-in spec. Commit the spec and sources; add the generated `iosApp/iosApp.xcodeproj/` to `.gitignore` (rule 10) and regenerate it with `xcodegen`.
 
-```python
-# File: scripts/create_ios_project.py
-import os
+Files to create:
+```
+iosApp/
+  project.yml
+  iosApp/
+    iOSApp.swift
+    Info.plist
+    PrivacyInfo.xcprivacy      (see 4.3.E.2)
+    Assets.xcassets/AppIcon.appiconset/   (1024x1024 PNG, no transparency)
+```
 
-PROJECT_DIR = "/Users/luizvaldetaro/valdetaro/FunHouse/iosApp"
-os.makedirs(f"{PROJECT_DIR}/iosApp.xcodeproj", exist_ok=True)
-os.makedirs(f"{PROJECT_DIR}/iosApp", exist_ok=True)
+`iosApp/project.yml`:
+```yaml
+name: iosApp
+options:
+  bundleIdPrefix: com.gepetto
+  deploymentTarget:
+    iOS: "16.0"
+settings:
+  base:
+    MARKETING_VERSION: "2.1.64"        # = versionName in gradle/libs.versions.toml
+    CURRENT_PROJECT_VERSION: "1647"    # = CommonConfig.iosVersionCode
+targets:
+  iosApp:
+    type: application
+    platform: iOS
+    sources: [iosApp]
+    info:
+      path: iosApp/Info.plist
+      properties:
+        CFBundleDisplayName: FunHouse
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        ITSAppUsesNonExemptEncryption: false
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.gepetto.gamescollection
+        TARGETED_DEVICE_FAMILY: "1,2"
+        FRAMEWORK_SEARCH_PATHS: "$(SRCROOT)/../composeApp/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        OTHER_LDFLAGS: ["-framework", "ComposeApp"]
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+    preBuildScripts:
+      - name: Compile Kotlin Framework
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/.."
+          ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode
+```
+> [!NOTE]
+> `CURRENT_PROJECT_VERSION` must increase for every App Store upload. Update both version settings whenever `libs.versions.toml` changes (or add a Gradle task that rewrites them).
 
-# 1. Write iOSApp.swift
-with open(f"{PROJECT_DIR}/iosApp/iOSApp.swift", "w") as f:
-    f.write('''import SwiftUI
+`iosApp/iosApp/iOSApp.swift`:
+```swift
+import SwiftUI
 import ComposeApp
 
 @main
@@ -979,39 +1223,18 @@ struct ContentView: UIViewControllerRepresentable {
     }
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
-''')
+```
+`ignoresSafeArea(.all)` hands all insets to Compose. Screens must then apply `WindowInsets.safeDrawing` (or `systemBarsPadding()` / `displayCutoutPadding()`, which common code already uses) and `imePadding()` on text-game input fields, so the notch, home indicator and keyboard do not cover content. Verify this in Phase 4.
 
-# 2. Write Info.plist
-with open(f"{PROJECT_DIR}/iosApp/Info.plist", "w") as f:
-    f.write('''<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>CFBundleExecutable</key>
-    <string>$(EXECUTABLE_NAME)</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.gepetto.gamescollection</string>
-    <key>CFBundleName</key>
-    <string>FunHouse</string>
-    <key>CFBundleShortVersionString</key>
-    <string>2.1.63</string>
-    <key>CFBundleVersion</key>
-    <string>163</string>
-    <key>ITSAppUsesNonExemptEncryption</key>
-    <false/>
-    <key>UISupportedInterfaceOrientations</key>
-    <array>
-        <string>UIInterfaceOrientationPortrait</string>
-        <string>UIInterfaceOrientationLandscapeLeft</string>
-        <string>UIInterfaceOrientationLandscapeRight</string>
-    </array>
-</dict>
-</plist>
-''')
-
-# 3. Create project.pbxproj with embedAndSignAppleFrameworkForXcode build phase
-# (Full template generates native targets linked with ComposeApp.framework)
-print("iosApp Xcode project template created successfully.")
+Generate and build:
+```bash
+cd /Users/luizvaldetaro/valdetaro/FunHouse/iosApp
+xcodegen
+xcodebuild -project iosApp.xcodeproj -scheme iosApp \
+           -destination 'platform=iOS Simulator,name=iPhone 17' \
+           -configuration Debug -derivedDataPath build build
+xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/iosApp.app
+xcrun simctl launch booted com.gepetto.gamescollection
 ```
 
 ---
@@ -1020,7 +1243,12 @@ print("iosApp Xcode project template created successfully.")
 
 FunHouse relies on game data files (CSV, JSON, Markdown, text files) located in `composeResources/files/`:
 - In Desktop/Android, `installAssetFiles()` copies them to `AppData.gameFolderFile`.
-- On iOS, `PlatformHelpersIos.installFile()` copies them from the application bundle's `compose-resources/` into the iOS sandbox `Documents/funhouse/` directory.
+- On iOS, `PlatformHelpersIos.installFile()` reads each file with `Res.readBytes("files/<name>")` (fallback `drawable/<name>`) and writes it into the iOS sandbox `Documents/<Constants.GAMES_FOLDER>/` directory. It must not guess bundle paths (see 6.2.3).
+- All 96 data files live in one place: `shared/common/src/commonMain/composeResources/files/`.
+- Verification (Phase 4): after first launch, list the sandbox folder and confirm the files exist:
+  ```bash
+  ls "$(xcrun simctl get_app_container booted com.gepetto.gamescollection data)/Documents/"*
+  ```
 - Because `AppData.gameFolderFile` is an instance of `java.io.File(gamePath)`, calls like:
   ```kotlin
   val licenseFile = File(AppData.gameFolderFile as File, game.licenseFile!!.fileName)
@@ -1033,7 +1261,8 @@ FunHouse relies on game data files (CSV, JSON, Markdown, text files) located in 
 
 Any agent picking up this plan can execute the phases sequentially using these exact steps:
 
-### Phase 0: Shared Libraries (`gepetto-utils`) [COMPLETED & PUBLISHED]
+### Phase 0: Shared Libraries (`GepettoLabs`, then named `gepetto-utils`) [COMPLETED & PUBLISHED]
+> Historical record. Paths below refer to the old `~/valdetaro/gepetto-utils` layout; today use `~/valdetaro/GepettoLabs/<lib>` and `GepettoLabs/publishlocal`.
 - [x] 0.0: Update `gepetto-utils/gradle/libs.versions.toml` with `ktor-client-darwin` and sync versions (`circum:2.1.1`, `gepetto-utils:2.1.1`, `gclog:0.1.1`, `gcadslib:0.4.1`).
 - [x] 0.1: Add iOS targets (`iosArm64`, `iosSimulatorArm64`) and implement `CircumIntentProcessorFunctions.ios.kt` in `gepetto-utils/circum`.
 - [x] 0.2: Add iOS targets, `applyDefaultHierarchyTemplate()`, `ktor-client-darwin`, and implement 11 actual files (`PlatformFile.ios.kt`, `PlatformBitmap.ios.kt`, `PlatformHttpClient.ios.kt`, `GcCurrentTimeMillis.ios.kt`, `Actuals.ios.kt`, `GcQrCodeScanner.ios.kt`, `ImageActuals.ios.kt`, `WebComposeUtils.ios.kt`, `Dispatcher.ios.kt`, `Utils.ios.kt`, `GcAppInfo.ios.kt`) in `gepetto-utils/gepetto-utils`.
@@ -1043,25 +1272,29 @@ Any agent picking up this plan can execute the phases sequentially using these e
 - [x] 0.6: Verify regression-free compilation: `./gradlew --no-daemon compileDebugKotlinAndroid compileKotlinDesktop compileKotlinWasmJs` and `./gradlew --no-daemon compileKotlinIosSimulatorArm64 compileKotlinIosArm64`.
 
 ### Phase 1: FunHouse `:shared:common` Module & Shims
-- [ ] 1.1: Add iOS targets and `-Xallow-kotlin-package` to `FunHouse/shared/common/build.gradle.kts`.
-- [ ] 1.2: Implement `java.io.File`, `BufferedReader`, `BufferedWriter`, `IOException`, `PrintWriter` shims in `src/iosMain/kotlin/java/io/`.
-- [ ] 1.3: Implement `java.util.Random` and `Locale` in `src/iosMain/kotlin/java/util/`.
-- [ ] 1.4: Implement `Thread.sleep`, `System`, and `Math` in `src/iosMain/kotlin/kotlin/`.
-- [ ] 1.5: Implement `android/content/Context`, `MediaMocks`, `SuppressLint`, and `LocalContext` in `src/iosMain/kotlin/android/`.
-- [ ] 1.6: Implement `PlatformHelpersIos.kt`, `TimeHelpersIos.kt`, `BackHandlerIos.kt`, `CacheHelper.ios.kt`, and `BaseKotlinGameSoundsIos.kt`.
-- [ ] 1.7: Verify compilation: `./gradlew :shared:common:compileKotlinIosSimulatorArm64`.
+- [ ] 1.1: Add iOS targets (`iosArm64`, `iosSimulatorArm64` only) and `-Xallow-kotlin-package` to `FunHouse/shared/common/build.gradle.kts`.
+- [ ] 1.2: Implement `java.io.File` (binary-safe `readBytes`/`copyTo`), `BufferedReader`, `BufferedWriter`, `FileReader`, `FileWriter`, `IOException`, `PrintWriter`, `Serializable` shims in `src/iosMain/kotlin/java/io/`.
+- [ ] 1.3: Implement `java.util.Random` (seed honored) and `Locale` in `src/iosMain/kotlin/java/util/`.
+- [ ] 1.4: Implement `Thread.sleep` (chunked), `InterruptedException(String)`, `System` (with `err`), and full `Math` (incl. `toRadians`, Long/Float/Double overloads) in `src/iosMain/kotlin/kotlin/`.
+- [ ] 1.5: Copy `kotlin/collections/CollectionsCompat.kt` (`removeIf`) and `kotlinx/coroutines/channels/TickerShim.kt` (`ticker`) from `wasmJsMain`. Do NOT copy `DispatchersIO.kt`.
+- [ ] 1.6: Implement `android/content/Context`, `MediaMocks`, `SuppressLint`, and `LocalContext` in `src/iosMain/kotlin/android/` and `androidx/`.
+- [ ] 1.7: Implement `PlatformHelpersIos.kt` (`installFile` via `Res.readBytes`, lazy `AVSpeechSynthesizer`), `TimeHelpersIos.kt`, `BackHandlerIos.kt`, `CacheHelper.ios.kt`, and `BaseKotlinGameSoundsIos.kt`.
+- [ ] 1.8: Diff the public declarations in `src/wasmJsMain/kotlin/{java,kotlin,kotlinx,android,androidx}` against `src/iosMain/kotlin/`; every shim used by common code must exist on iOS.
+- [ ] 1.9: Verify compilation: `./gradlew :shared:common:compileKotlinIosSimulatorArm64`. Then, as an early check of the shims, compile the shim-heavy modules: `./gradlew :feature:castle-kotlin:compileKotlinIosSimulatorArm64 :feature:classic-arcades:compileKotlinIosSimulatorArm64 :feature:colossal-cave-adventure-kotlin:compileKotlinIosSimulatorArm64 :feature:tetric:compileKotlinIosSimulatorArm64` (needs the iOS targets from 2.1 in those four modules).
+- [ ] 1.10: Regression check (rule 9): `./gradlew :composeApp:compileDebugKotlinAndroid :composeApp:compileKotlinDesktop :composeApp:compileKotlinWasmJs`.
 
 ### Phase 2: Feature Modules (20 Games)
-- [ ] 2.1: Add iOS targets to all 19 pure-Kotlin feature `build.gradle.kts` files.
-- [ ] 2.2: Add iOS targets to `feature/funhouse-engine-kotlin/build.gradle.kts`.
-- [ ] 2.3: Implement `ConcurrencyHelpersIos.kt`, `DiscoveryHelperIos.kt`, and `GameSocketIos.kt` in `feature/funhouse-engine-kotlin`.
-- [ ] 2.4: Verify compilation: `./gradlew compileKotlinIosSimulatorArm64`.
+- [ ] 2.1: Add iOS targets (`iosArm64`, `iosSimulatorArm64`) to all 19 commonMain-only feature `build.gradle.kts` files.
+- [ ] 2.2: Add iOS targets to `feature/funhouse-engine-kotlin/build.gradle.kts`, plus atomicfu (via the catalog) in `iosMain`.
+- [ ] 2.3: Implement `ConcurrencyHelpersIos.kt` (atomicfu lock, not `objc_sync_enter`), `DiscoveryHelperIos.kt`, and `GameSocketIos.kt` (stubs) in `feature/funhouse-engine-kotlin`.
+- [ ] 2.4: Verify compilation: `./gradlew compileKotlinIosSimulatorArm64`. If a game fails, fix the shim, not the game.
+- [ ] 2.5: Regression check: Android, Desktop and WasmJs compile tasks (as in 1.10) and existing tests (`:feature:funhouse-engine-kotlin:desktopTest`, `:feature:wander-engine-kotlin:desktopTest`).
 
 ### Phase 3: `:composeApp` & `iosApp` Xcode Wrapper
-- [ ] 3.1: Add iOS framework target to `FunHouse/composeApp/build.gradle.kts`.
-- [ ] 3.2: Implement `composeApp/src/iosMain/kotlin/Main.kt` with safe Koin initialization and `File(gamePath)`.
-- [ ] 3.3: Generate `iosApp/` project (`iOSApp.swift`, `Info.plist`, `iosApp.xcodeproj`).
-- [ ] 3.4: Build standalone debug framework: `./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64` (and verify Xcode embed task `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`).
+- [ ] 3.1: Add iOS framework target to `FunHouse/composeApp/build.gradle.kts` (no `export(...)`), and add `iosVersionCode` to `generateCommonConfig`.
+- [ ] 3.2: Implement `composeApp/src/iosMain/kotlin/Main.kt` with safe Koin initialization, `File(gamePath)`, `CommonConfig.iosVersionCode`, and `GcAppInfo.appPackageFolder`.
+- [ ] 3.3: Create `iosApp/project.yml`, `iOSApp.swift`, `Info.plist`, `PrivacyInfo.xcprivacy`, `Assets.xcassets`; run `xcodegen`; add `iosApp/iosApp.xcodeproj/` and `iosApp/build/` to `.gitignore`.
+- [ ] 3.4: Build standalone debug framework: `./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64`. (`embedAndSignAppleFrameworkForXcode` only works when Xcode runs it, because it reads Xcode environment variables; check it through the `xcodebuild` build in 4.2.)
 
 ### Phase 4: Simulator Launch & Gameplay Verification
 - [ ] 4.1: Boot simulator: `xcrun simctl boot "iPhone 17" && open -a Simulator`.
@@ -1071,19 +1304,24 @@ Any agent picking up this plan can execute the phases sequentially using these e
   - Compose games: Blackjack, Chess, Slot Machine, Classic Arcades.
   - Text games: Eliza, Adventure, FunHouse, Wander, Castle.
 - [ ] 4.5: Verify dark mode toggle (`Cmd + Shift + A`) and landscape orientation (`Cmd + Arrow`).
+- [ ] 4.6: Verify the game files were installed in the sandbox (command in 6.6), and that seeded games (Chimaera, Wizard's Castle) start.
+- [ ] 4.7: Verify safe areas and the software keyboard: text-game input stays visible above the keyboard on iPhone 17 and on an iPad simulator.
+- [ ] 4.8: Run each text game (Eliza, Adventure, Castle, Dinkum, Chimaera, Wizard's Castle, FunHouse, Wander) with the same commands as the desktop baseline and compare the output.
+- [ ] 4.9: Hide any game that does not work on iOS before Phase 6 (Guideline 2.1).
 
 ### Phase 5: Google Mobile Ads (AdMob) iOS Integration (Monetization)
 - [ ] 5.1: Add Google Mobile Ads SDK (`Google-Mobile-Ads-SDK`) via Swift Package Manager to `iosApp.xcodeproj`.
 - [ ] 5.2: Configure `GADApplicationIdentifier` in `iosApp/Info.plist`.
 - [ ] 5.3: Add `NSUserTrackingUsageDescription` (ATT prompt) and `SKAdNetworkItems` to `iosApp/Info.plist`.
-- [ ] 5.4: Implement ATT authorization trigger in `iOSApp.swift`.
+- [ ] 5.4: Implement the UMP consent form (EEA/UK), then the ATT authorization trigger, in `iOSApp.swift`.
 - [ ] 5.5: Wire `AdBannerView` bridge into `iosMain` and test with Google's iOS Test Ad Unit ID.
 
 ### Phase 6: App Store Connect & Distribution Preparation
 - [ ] 6.1: Create Apple Developer Account ($99/year individual enrollment).
 - [ ] 6.2: Create App record in App Store Connect with bundle ID `com.gepetto.gamescollection`.
-- [ ] 6.3: Capture simulator screenshots (`Cmd + S`) for 6.7" iPhone and 12.9" iPad.
-- [ ] 6.4: Complete Age Rating questionnaire (declaring Simulated Gambling for Casino games).
+- [ ] 6.3: Capture simulator screenshots (`Cmd + S`) for 6.9" iPhone (iPhone 17 Pro Max) and 13" iPad.
+- [ ] 6.4: Complete Age Rating questionnaire (declaring Simulated Gambling for Casino games; ratings are 4+/9+/13+/16+/18+).
+- [ ] 6.4b: Confirm `PrivacyInfo.xcprivacy` is in the app target and matches the APIs in use (Xcode → Product → Archive → Generate Privacy Report).
 - [ ] 6.5: Complete App Store Privacy questionnaire: Declare Tracking/Identifiers/Diagnostics for Google AdMob.
 - [ ] 6.6: Publish Privacy Policy URL.
 - [ ] 6.7: Create release archive via Xcode and submit to TestFlight.
@@ -1099,6 +1337,7 @@ Any agent picking up this plan can execute the phases sequentially using these e
 | 2026-09-17 | Initial Agent | Rev 3: Full Google AdMob iOS integration added into the plan: complete code samples (stubs vs SPM/UIKitView bridge), ATT authorization Swift code, GADApplicationIdentifier crash prevention, SKAdNetworkItems, App Store Privacy Nutrition Labels, and dedicated Phase 5 execution checklist. |
 | 2026-09-18 | Review Agent | Rev 4: Comprehensive audit & update: (1) Synchronized with recent JDK 21 / Kotlin 2.4.20 / Compose 1.12.0 migrations; (2) Fixed `gclog` package mismatch (`club.gepetto`); (3) Corrected `circumIntentProcessor` signature with `@Composable` and `koinInject`; (4) Supplied complete expect/actual stubs for `ads-lib` matching `ExpectationsUi.kt`; (5) Documented full `gepetto-utils` iOS actuals (`PlatformFile`, `createPlatformHttpClient` with `ktor-client-darwin`, `PlatformBitmap`); (6) Reordered Phase 0 build order (`circum` -> `gepetto-utils` -> `gclog` -> `ads-lib`); (7) Added missing `java.io.*` and `Thread` shims to allow 20 game modules to compile; (8) Fixed runtime `ClassCastException` on `AppData.gameFolderFile` by using `File(gamePath)`; (9) Fixed Koin re-initialization crash with `GlobalContext.getOrNull()`; (10) Added automated Python generator for `iosApp.xcodeproj`. |
 | 2026-09-18 | Execution Agent | Rev 5: Phase 0 Completed & Verified. Added modern Apple iOS targets (`iosArm64`, `iosSimulatorArm64`) to all 4 libraries in `gepetto-utils` (`circum:2.1.1`, `gepetto-utils:2.1.1`, `gclog:0.1.1`, `gcadslib:0.4.1`), created all 15 native iOS actual files, published all klibs and artifacts to `mavenLocal()`, verified existing Android/Desktop/WasmJs and iOS targets cleanly without regressions. Advanced roadmap to Phase 1. |
+| 2026-11-13 | Audit Agent | Rev 6: Audit against the codebase. (1) Library paths moved to `GepettoLabs/` (4 standalone projects); corrected build order (gclog has no deps); iOS libs confirmed on Maven Central. (2) Removed `iosX64` from all code samples (contradicted BUG-011). (3) Completed iOS shims: `InterruptedException(String)`, `System.err`, full `Math`, `removeIf`, `ticker`, seeded `Random`, binary-safe `File.readBytes/copyTo`, chunked `Thread.sleep`; added usage table and wasm-parity rule. (4) `installFile` now uses `Res.readBytes` (old bundle paths missed `composeResources/`). (5) Removed invalid `export(project(":shared:common"))`. (6) Version code from generated `CommonConfig.iosVersionCode`; set `GcAppInfo.appPackageFolder`. (7) `gcSynchronized` uses atomicfu lock, not `objc_sync_enter`. (8) Bonjour type `_funhouse-game._tcp` to match Android. (9) Replaced non-functional Python generator with XcodeGen `project.yml`. (10) Added `PrivacyInfo.xcprivacy`, UMP consent, new App Store age ratings and screenshot sizes; Guideline 4.7 reference corrected. (11) Toolchain: Xcode 27.2, Kotlin 2.4.21, app 2.1.64/164. (12) Expanded Phase 1–4 checklists. |
 
 ---
 
@@ -1106,7 +1345,7 @@ Any agent picking up this plan can execute the phases sequentially using these e
 
 | ID | Module / Component | Description | Status | Workaround / Resolution |
 |---|---|---|---|---|
-| BUG-001 | `gepetto-utils` | iOS targets not declared in `gepetto-utils` library | Resolved in Phase 0 | Implemented `iosArm64()` and `iosSimulatorArm64()` in all 4 libraries and published to `mavenLocal()`. |
+| BUG-001 | `gepetto-utils` | iOS targets not declared in `gepetto-utils` library | Resolved in Phase 0 | Implemented `iosArm64()` and `iosSimulatorArm64()` in all 4 libraries and published to `mavenLocal()` (now also on Maven Central). |
 | BUG-002 | `funhouse-engine-kotlin` | Platform-specific WebSocket & Concurrency code on JVM/Android | Open (Phase 2) | Implement Coroutine Channel queue, usleep, `objc_sync_enter/exit`, and stubs for discovery/sockets. |
 | BUG-003 | App Store Review | Risk of rejection due to undeclared casino games | Documented (Phase 6) | Declare "Simulated Gambling" in Age Rating questionnaire (12+/17+ rating). |
 | BUG-004 | App Store Review | Risk of rejection if "Tetric" infringes Tetris trademark | Documented (Phase 6) | Ensure `AppData.secretGamesEnabled = false` for release builds. |
@@ -1117,6 +1356,13 @@ Any agent picking up this plan can execute the phases sequentially using these e
 | BUG-009 | `composeApp` | `KoinAppAlreadyStartedException` when SwiftUI recreates `MainViewController` | Resolved in Rev 4 | Guard `startKoin` with `if (GlobalContext.getOrNull() == null)`. |
 | BUG-010 | `gclog` | Package mismatch between `club.gepetto.gclog` and common `club.gepetto` | Resolved in Rev 4 | Use `package club.gepetto` for iOS actuals. |
 | BUG-011 | Modern KMP / Compose 1.12.0 | `iosX64` targets fail dependency resolution | Resolved in Phase 0 | Target modern Apple Silicon: `iosSimulatorArm64` (simulator) and `iosArm64` (device). |
-| BUG-012 | `gepetto-utils` / coroutines | `Dispatchers.IO` is internal in Kotlin/Native coroutines | Resolved in Phase 0 | Used `Dispatchers.Default` for iOS `ioDispatcher` (matching WasmJs behavior). |
+| BUG-012 | `gepetto-utils` / coroutines | ~~`Dispatchers.IO` is internal in Kotlin/Native coroutines~~ — incorrect: `Dispatchers.IO` is public on Kotlin/Native (needs `import kotlinx.coroutines.IO`). | Resolved in Phase 0 (no change needed) | `Dispatchers.Default` for iOS `ioDispatcher` works; switching to `Dispatchers.IO` is optional. Do not port the wasm `DispatchersIO.kt` shim to iOS. |
+| BUG-013 | `shared:common` shims | Rev 5 shims miss APIs used by games: `InterruptedException(String)`, `System.err`, `Math.toRadians` + overloads, `removeIf`, `ticker`. Phase 2 would not compile. | Fixed in plan (Rev 6) | See 6.2.2 usage table; keep iOS shims in parity with `wasmJsMain`. |
+| BUG-014 | `shared:common` | `installFile` bundle paths left out `composeResources/`, so no game file would be installed (silent `return`). | Fixed in plan (Rev 6) | Use `Res.readBytes("files/$name")`. |
+| BUG-015 | `composeApp` | `export(project(":shared:common"))` fails: export requires an `api` dependency. | Fixed in plan (Rev 6) | Removed `export`. |
+| BUG-016 | `shared:common` shims | `java.util.Random(seed)` ignored the seed; `File.readBytes()`/`copyTo()` went through text and corrupted binary files. | Fixed in plan (Rev 6) | Seeded `kotlin.random.Random`; NSData / NSFileManager copies. |
+| BUG-017 | `funhouse-engine-kotlin` | `objc_sync_enter` on Kotlin objects is not a reliable lock. | Fixed in plan (Rev 6) | atomicfu reentrant lock. |
+| BUG-018 | `iosApp` | Rev 4 Python generator never wrote `project.pbxproj`. | Fixed in plan (Rev 6) | XcodeGen `project.yml`. |
+| BUG-019 | App Store | Missing privacy manifest (NSUserDefaults, file timestamps are required-reason APIs). | Fixed in plan (Rev 6) | `PrivacyInfo.xcprivacy` in 4.3.E.2. |
 
 *(Agents executing this plan: Add new entries above whenever a bug or obstacle is encountered during implementation)*
